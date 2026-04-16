@@ -1,7 +1,9 @@
 import { IOrderInput } from '@/types'
 import { Document, Model, model, models, Schema } from 'mongoose'
+import { Types } from 'mongoose'
 
 export interface IOrder extends Document, IOrderInput {
+  _id: Types.ObjectId
   createdAt: Date
   updatedAt: Date
 }
