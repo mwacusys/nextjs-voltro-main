@@ -57,10 +57,10 @@ export default async function OrdersPage(props: {
               </TableRow>
             )}
             {orders.data.map((order: IOrder) => (
-              <TableRow key={order._id}>
+              <TableRow key={order._id.toString()}>
                 <TableCell>
-                  <Link href={`/account/orders/${order._id}`}>
-                    {formatId(order._id)}
+                  <Link href={`/account/orders/${order._id.toString()}`}>
+                    {formatId(order._id.toString())}
                   </Link>
                 </TableCell>
                 <TableCell>
