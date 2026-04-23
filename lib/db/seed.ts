@@ -35,7 +35,7 @@ const main = async () => {
 
     await Product.deleteMany()
     const createdProducts = await Product.insertMany(
-      products.map((x) => ({ ...x, _id: undefined }))
+      products.map((x) => ({ ...x, _id: undefined })),
     )
 
     await Review.deleteMany()
@@ -68,8 +68,8 @@ const main = async () => {
         await generateOrder(
           i,
           createdUser.map((x) => x._id),
-          createdProducts.map((x) => x._id)
-        )
+          createdProducts.map((x) => x._id),
+        ),
       )
     }
     const createdOrders = await Order.insertMany(orders)
@@ -91,7 +91,7 @@ const main = async () => {
 const generateOrder = async (
   i: number,
   users: any,
-  products: any
+  products: any,
 ): Promise<IOrderInput> => {
   const product1 = await Product.findById(products[i % products.length])
 
@@ -100,14 +100,14 @@ const generateOrder = async (
       i % products.length >= products.length - 1
         ? (i % products.length) - 1
         : (i % products.length) + 1
-    ]
+    ],
   )
   const product3 = await Product.findById(
     products[
       i % products.length >= products.length - 2
         ? (i % products.length) - 2
         : (i % products.length) + 2
-    ]
+    ],
   )
 
   if (!product1 || !product2 || !product3) throw new Error('Product not found')
@@ -115,7 +115,7 @@ const generateOrder = async (
   const items = [
     {
       clientId: generateId(),
-      product: product1._id,
+      product: product1._id.toString(),
       name: product1.name,
       slug: product1.slug,
       quantity: 1,
@@ -126,7 +126,7 @@ const generateOrder = async (
     },
     {
       clientId: generateId(),
-      product: product2._id,
+      product: product2._id.toString(),
       name: product2.name,
       slug: product2.slug,
       quantity: 2,
@@ -137,7 +137,7 @@ const generateOrder = async (
     },
     {
       clientId: generateId(),
-      product: product3._id,
+      product: product3._id.toString(),
       name: product3.name,
       slug: product3.slug,
       quantity: 3,
@@ -181,7 +181,7 @@ export const calcDeliveryDateAndPriceForSeed = ({
 }) => {
   const { availableDeliveryDates } = data.settings[0]
   const itemsPrice = round2(
-    items.reduce((acc, item) => acc + item.price * item.quantity, 0)
+    items.reduce((acc, item) => acc + item.price * item.quantity, 0),
   )
 
   const deliveryDate =
@@ -197,7 +197,7 @@ export const calcDeliveryDateAndPriceForSeed = ({
   const totalPrice = round2(
     itemsPrice +
       (shippingPrice ? round2(shippingPrice) : 0) +
-      (taxPrice ? round2(taxPrice) : 0)
+      (taxPrice ? round2(taxPrice) : 0),
   )
   return {
     availableDeliveryDates,
