@@ -15,26 +15,90 @@ import {
 } from '@react-email/components'
 
 import { formatCurrency } from '@/lib/utils'
-import { IOrder } from '@/lib/db/models/order.model'
 import { getSetting } from '@/lib/actions/setting.actions'
 
-type OrderInformationProps = {
-  order: IOrder
+/* =========================
+   TYPES (CLEAN - NO MONGO)
+========================= */
+
+type OrderItem = {
+  clientId: string
+  name: string
+  image: string
+  price: number
+  quantity: number
+  product: string
+  slug: string
+  category: string
+  countInStock: number
 }
+
+type OrderEmailType = {
+  _id: string
+  createdAt?: Date
+  updatedAt?: Date
+
+  isPaid?: boolean
+  paidAt?: Date
+
+  totalPrice: number
+  itemsPrice: number
+  taxPrice: number
+  shippingPrice: number
+
+  paymentMethod?: string
+  expectedDeliveryDate?: Date
+  isDelivered?: boolean
+
+  user: {
+    name: string
+    email: string
+  }
+
+  shippingAddress: {
+    fullName: string
+    street: string
+    city: string
+    postalCode: string
+    country: string
+    phone: string
+    province: string
+  }
+
+  items: OrderItem[]
+}
+
+type OrderInformationProps = {
+  order: OrderEmailType
+}
+
+/* =========================
+   PREVIEW DATA (NO CASTING)
+========================= */
 
 PurchaseReceiptEmail.PreviewProps = {
   order: {
     _id: '123',
+    createdAt: new Date(),
+    updatedAt: new Date(),
+
     isPaid: true,
     paidAt: new Date(),
+
     totalPrice: 100,
     itemsPrice: 100,
     taxPrice: 0,
     shippingPrice: 0,
+
+    paymentMethod: 'PayPal',
+    expectedDeliveryDate: new Date(),
+    isDelivered: true,
+
     user: {
       name: 'John Doe',
       email: 'john.doe@example.com',
     },
+
     shippingAddress: {
       fullName: 'John Doe',
       street: '123 Main St',
@@ -44,6 +108,7 @@ PurchaseReceiptEmail.PreviewProps = {
       phone: '123-456-7890',
       province: 'New York',
     },
+
     items: [
       {
         clientId: '123',
@@ -57,17 +122,22 @@ PurchaseReceiptEmail.PreviewProps = {
         countInStock: 10,
       },
     ],
-    paymentMethod: 'PayPal',
-    expectedDeliveryDate: new Date(),
-    isDelivered: true,
-  } as IOrder,
+  },
 } satisfies OrderInformationProps
-const dateFormatter = new Intl.DateTimeFormat('en', { dateStyle: 'medium' })
+
+const dateFormatter = new Intl.DateTimeFormat('en', {
+  dateStyle: 'medium',
+})
+
+/* =========================
+   COMPONENT
+========================= */
 
 export default async function PurchaseReceiptEmail({
   order,
 }: OrderInformationProps) {
   const { site } = await getSetting()
+
   return (
     <Html>
       <Preview>View order receipt</Preview>
@@ -76,35 +146,37 @@ export default async function PurchaseReceiptEmail({
         <Body className='font-sans bg-white'>
           <Container className='max-w-xl'>
             <Heading>Purchase Receipt</Heading>
+
+            {/* ORDER SUMMARY */}
             <Section>
               <Row>
                 <Column>
-                  <Text className='mb-0 text-gray-500 whitespace-nowrap text-nowrap mr-4'>
-                    Order ID
-                  </Text>
-                  <Text className='mt-0 mr-4'>{order._id.toString()}</Text>
+                  <Text className='mb-0 text-gray-500'>Order ID</Text>
+                  <Text className='mt-0'>{order._id}</Text>
                 </Column>
+
                 <Column>
-                  <Text className='mb-0 text-gray-500 whitespace-nowrap text-nowrap mr-4'>
-                    Purchased On
-                  </Text>
-                  <Text className='mt-0 mr-4'>
-                    {dateFormatter.format(order.createdAt)}
+                  <Text className='mb-0 text-gray-500'>Purchased On</Text>
+                  <Text className='mt-0'>
+                    {order.createdAt
+                      ? dateFormatter.format(order.createdAt)
+                      : '-'}
                   </Text>
                 </Column>
+
                 <Column>
-                  <Text className='mb-0 text-gray-500 whitespace-nowrap text-nowrap mr-4'>
-                    Price Paid
-                  </Text>
-                  <Text className='mt-0 mr-4'>
+                  <Text className='mb-0 text-gray-500'>Price Paid</Text>
+                  <Text className='mt-0'>
                     {formatCurrency(order.totalPrice)}
                   </Text>
                 </Column>
               </Row>
             </Section>
-            <Section className='border border-solid border-gray-500 rounded-lg p-4 md:p-6 my-4'>
+
+            {/* ITEMS */}
+            <Section className='border border-gray-300 rounded-lg p-4 my-4'>
               {order.items.map((item) => (
-                <Row key={item.product} className='mt-8'>
+                <Row key={item.product} className='mt-6'>
                   <Column className='w-20'>
                     <Link href={`${site.url}/product/${item.slug}`}>
                       <Img
@@ -119,28 +191,32 @@ export default async function PurchaseReceiptEmail({
                       />
                     </Link>
                   </Column>
-                  <Column className='align-top'>
+
+                  <Column>
                     <Link href={`${site.url}/product/${item.slug}`}>
                       <Text className='mx-2 my-0'>
                         {item.name} x {item.quantity}
                       </Text>
                     </Link>
                   </Column>
-                  <Column align='right' className='align-top'>
-                    <Text className='m-0 '>{formatCurrency(item.price)}</Text>
+
+                  <Column align='right'>
+                    <Text>{formatCurrency(item.price)}</Text>
                   </Column>
                 </Row>
               ))}
+
+              {/* TOTALS */}
               {[
                 { name: 'Items', price: order.itemsPrice },
                 { name: 'Tax', price: order.taxPrice },
                 { name: 'Shipping', price: order.shippingPrice },
                 { name: 'Total', price: order.totalPrice },
               ].map(({ name, price }) => (
-                <Row key={name} className='py-1'>
+                <Row key={name}>
                   <Column align='right'>{name}:</Column>
-                  <Column align='right' width={70} className='align-top'>
-                    <Text className='m-0'>{formatCurrency(price)}</Text>
+                  <Column align='right' width={80}>
+                    <Text>{formatCurrency(price)}</Text>
                   </Column>
                 </Row>
               ))}
