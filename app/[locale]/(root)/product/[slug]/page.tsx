@@ -18,25 +18,20 @@ import RatingSummary from '@/components/shared/product/rating-summary'
 import ProductSlider from '@/components/shared/product/product-slider'
 import { getTranslations } from 'next-intl/server'
 
-/* ✅ STRICT TYPE */
-export type RatingDistribution = {
-  rating: number
-  count: number
-}[]
-
 type ProductClient = {
   _id: string
   slug: string
   category: string
   avgRating: number
   numReviews: number
-  ratingDistribution: RatingDistribution
+
+  ratingDistribution: RatingDistributionItem[] // IMPORTANT FIX
 
   name: string
   images: string[]
 
   price: number
-  listPrice?: number
+  listPrice: number
   brand: string
   description: string
   countInStock: number
@@ -44,21 +39,22 @@ type ProductClient = {
   colors: string[]
   tags: string[]
 }
-type RatingDistributionItem = {
+export type RatingDistributionItem = {
   rating: number
   count: number
 }
-
-/* ✅ FIX: no `any` */
 export function normalizeRatingDistribution(
-  data: Record<string, number>,
+  data?:
+    | {
+        [x: string]: number
+      }
+    | undefined,
 ): RatingDistributionItem[] {
   return Object.entries(data || {}).map(([rating, count]) => ({
     rating: Number(rating),
     count: Number(count),
   }))
 }
-
 /* ✅ METADATA */
 export async function generateMetadata({
   params,
@@ -98,25 +94,35 @@ export default async function ProductDetails({
 
   const productId = product._id.toString()
 
+  const ratingDistributionObject: { [key: string]: number } =
+    product.ratingDistribution.reduce(
+      (acc, { rating, count }) => {
+        acc[rating.toString()] = count
+        return acc
+      },
+      {} as { [key: string]: number },
+    )
+
   const productClient: ProductClient = {
     _id: productId,
     slug: product.slug,
     category: product.category,
     avgRating: product.avgRating,
     numReviews: product.numReviews,
-    ratingDistribution: product.ratingDistribution,
+    ratingDistribution: normalizeRatingDistribution(ratingDistributionObject),
 
     name: product.name,
-    images: product.images,
+    images: product.images ?? [],
 
     price: product.price,
     listPrice: product.listPrice,
     brand: product.brand,
     description: product.description,
     countInStock: product.countInStock,
-    sizes: product.sizes,
-    colors: product.colors,
-    tags: product.tags,
+
+    sizes: product.sizes ?? [],
+    colors: product.colors ?? [],
+    tags: product.tags ?? [],
   }
 
   const relatedProducts = await getRelatedProductsByCategory({
