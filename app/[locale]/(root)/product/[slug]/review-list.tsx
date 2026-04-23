@@ -1,7 +1,7 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Calendar, Check, StarIcon, User } from 'lucide-react'
+import { Calendar, StarIcon, User } from 'lucide-react'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { SubmitHandler, useForm } from 'react-hook-form'
@@ -51,7 +51,6 @@ import {
 } from '@/lib/actions/review.actions'
 import { ReviewInputSchema } from '@/lib/validator'
 import RatingSummary from '@/components/shared/product/rating-summary'
-import { IProduct } from '@/lib/db/models/product.model'
 import { Separator } from '@/components/ui/separator'
 import { IReviewDetails } from '@/types'
 
@@ -66,12 +65,11 @@ export default function ReviewList({
   product,
 }: {
   userId: string | undefined
-  product: IProduct
+  product: any // 👈 avoid ObjectId issues from mongoose
 }) {
   const t = useTranslations('Product')
-  const { toast } = useToast()
 
-  const productId = product._id.toString() // ✅ FIX ONCE
+  const productId = product._id.toString() // ✅ FIX ObjectId once here
 
   const [page, setPage] = useState(2)
   const [totalPages, setTotalPages] = useState(0)
@@ -79,7 +77,9 @@ export default function ReviewList({
   const [loadingReviews, setLoadingReviews] = useState(false)
 
   const { ref, inView } = useInView({ triggerOnce: true })
+  const { toast } = useToast()
 
+  // 🔁 Reload reviews
   const reload = async () => {
     try {
       const res = await getReviews({ productId, page: 1 })
@@ -93,18 +93,19 @@ export default function ReviewList({
     }
   }
 
+  // 🔁 Load more
   const loadMoreReviews = async () => {
-    if (totalPages !== 0 && page > totalPages) return
+    if (page > totalPages) return
 
     setLoadingReviews(true)
     const res = await getReviews({ productId, page })
-    setLoadingReviews(false)
-
     setReviews((prev) => [...prev, ...res.data])
     setTotalPages(res.totalPages)
     setPage((prev) => prev + 1)
+    setLoadingReviews(false)
   }
 
+  // 🔁 Initial load
   useEffect(() => {
     const loadReviews = async () => {
       setLoadingReviews(true)
@@ -117,6 +118,7 @@ export default function ReviewList({
     if (inView) loadReviews()
   }, [inView, productId])
 
+  // 🧾 Form
   type CustomerReview = z.infer<typeof ReviewInputSchema>
 
   const form = useForm<CustomerReview>({
@@ -152,7 +154,7 @@ export default function ReviewList({
     form.setValue('user', userId!)
     form.setValue('isVerifiedPurchase', true)
 
-    const review = await getReviewByProductId({ productId }) // ✅ FIX
+    const review = await getReviewByProductId({ productId })
 
     if (review) {
       form.setValue('title', review.title)
@@ -168,6 +170,7 @@ export default function ReviewList({
       {reviews.length === 0 && <div>{t('No reviews yet')}</div>}
 
       <div className='grid grid-cols-1 md:grid-cols-4 gap-8'>
+        {/* LEFT */}
         <div className='flex flex-col gap-2'>
           {reviews.length !== 0 && (
             <RatingSummary
@@ -180,9 +183,7 @@ export default function ReviewList({
           <Separator className='my-3' />
 
           <div className='space-y-3'>
-            <h3 className='font-bold text-lg lg:text-xl'>
-              {t('Review this product')}
-            </h3>
+            <h3 className='font-bold text-lg'>{t('Review this product')}</h3>
 
             <p className='text-sm'>
               {t('Share your thoughts with other customers')}
@@ -249,21 +250,26 @@ export default function ReviewList({
                                 onValueChange={field.onChange}
                                 value={field.value.toString()}
                               >
-                                <SelectTrigger>
-                                  <SelectValue />
-                                </SelectTrigger>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                </FormControl>
 
                                 <SelectContent>
-                                  {Array.from({ length: 5 }).map((_, i) => (
+                                  {[1, 2, 3, 4, 5].map((num) => (
                                     <SelectItem
-                                      key={i}
-                                      value={(i + 1).toString()}
+                                      key={num}
+                                      value={num.toString()}
                                     >
-                                      {i + 1} <StarIcon className='h-4 w-4' />
+                                      <div className='flex items-center gap-1'>
+                                        {num} <StarIcon className='h-4 w-4' />
+                                      </div>
                                     </SelectItem>
                                   ))}
                                 </SelectContent>
                               </Select>
+
                               <FormMessage />
                             </FormItem>
                           )}
@@ -271,7 +277,10 @@ export default function ReviewList({
                       </div>
 
                       <DialogFooter>
-                        <Button type='submit'>
+                        <Button
+                          type='submit'
+                          disabled={form.formState.isSubmitting}
+                        >
                           {form.formState.isSubmitting
                             ? t('Submitting...')
                             : t('Submit')}
@@ -284,7 +293,10 @@ export default function ReviewList({
             ) : (
               <div>
                 {t('Please')}{' '}
-                <Link href={`/sign-in?callbackUrl=/product/${product.slug}`}>
+                <Link
+                  href={`/sign-in?callbackUrl=/product/${product.slug}`}
+                  className='highlight-link'
+                >
                   {t('sign in')}
                 </Link>{' '}
                 {t('to write a review')}
@@ -293,21 +305,28 @@ export default function ReviewList({
           </div>
         </div>
 
+        {/* RIGHT */}
         <div className='md:col-span-3 flex flex-col gap-3'>
           {reviews.map((review) => (
-            <Card key={review._id}>
+            <Card key={review._id.toString()}>
               <CardHeader>
                 <CardTitle>{review.title}</CardTitle>
                 <CardDescription>{review.comment}</CardDescription>
               </CardHeader>
 
               <CardContent>
-                <div className='flex gap-4 text-sm'>
+                <div className='flex space-x-4 text-sm text-muted-foreground'>
                   <Rating rating={review.rating} />
-                  <span>{review.user?.name || t('Deleted User')}</span>
-                  <span>
-                    {new Date(review.createdAt).toISOString().substring(0, 10)}
-                  </span>
+
+                  <div className='flex items-center'>
+                    <User className='mr-1 h-3 w-3' />
+                    {review.user?.name || t('Deleted User')}
+                  </div>
+
+                  <div className='flex items-center'>
+                    <Calendar className='mr-1 h-3 w-3' />
+                    {review.createdAt?.toString().substring(0, 10)}
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -319,6 +338,7 @@ export default function ReviewList({
                 {t('See more reviews')}
               </Button>
             )}
+
             {loadingReviews && t('Loading')}
           </div>
         </div>
