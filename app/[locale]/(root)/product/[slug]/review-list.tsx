@@ -54,6 +54,16 @@ import RatingSummary from '@/components/shared/product/rating-summary'
 import { Separator } from '@/components/ui/separator'
 import { IReviewDetails } from '@/types'
 
+/* ✅ SAFE FRONTEND TYPE */
+type ProductClient = {
+  _id: string
+  slug: string
+  category: string
+  avgRating: number
+  numReviews: number
+  ratingDistribution: any
+}
+
 const reviewFormDefaultValues = {
   title: '',
   comment: '',
@@ -65,11 +75,12 @@ export default function ReviewList({
   product,
 }: {
   userId: string | undefined
-  product: any // 👈 avoid ObjectId issues from mongoose
+  product: ProductClient
 }) {
   const t = useTranslations('Product')
+  const { toast } = useToast()
 
-  const productId = product._id.toString() // ✅ FIX ObjectId once here
+  const productId = product._id // ✅ already string
 
   const [page, setPage] = useState(2)
   const [totalPages, setTotalPages] = useState(0)
@@ -77,9 +88,8 @@ export default function ReviewList({
   const [loadingReviews, setLoadingReviews] = useState(false)
 
   const { ref, inView } = useInView({ triggerOnce: true })
-  const { toast } = useToast()
 
-  // 🔁 Reload reviews
+  /* 🔁 Reload */
   const reload = async () => {
     try {
       const res = await getReviews({ productId, page: 1 })
@@ -93,19 +103,21 @@ export default function ReviewList({
     }
   }
 
-  // 🔁 Load more
+  /* 🔁 Load more */
   const loadMoreReviews = async () => {
-    if (page > totalPages) return
+    if (page > totalPages || loadingReviews) return
 
     setLoadingReviews(true)
     const res = await getReviews({ productId, page })
+
     setReviews((prev) => [...prev, ...res.data])
     setTotalPages(res.totalPages)
     setPage((prev) => prev + 1)
+
     setLoadingReviews(false)
   }
 
-  // 🔁 Initial load
+  /* 🔁 Initial load */
   useEffect(() => {
     const loadReviews = async () => {
       setLoadingReviews(true)
@@ -118,7 +130,7 @@ export default function ReviewList({
     if (inView) loadReviews()
   }, [inView, productId])
 
-  // 🧾 Form
+  /* 🧾 Form */
   type CustomerReview = z.infer<typeof ReviewInputSchema>
 
   const form = useForm<CustomerReview>({
@@ -130,7 +142,7 @@ export default function ReviewList({
 
   const onSubmit: SubmitHandler<CustomerReview> = async (values) => {
     const res = await createUpdateReview({
-      data: { ...values, product: productId }, // ✅ FIX
+      data: { ...values, product: productId },
       path: `/product/${product.slug}`,
     })
 
@@ -150,7 +162,7 @@ export default function ReviewList({
   }
 
   const handleOpenForm = async () => {
-    form.setValue('product', productId) // ✅ FIX
+    form.setValue('product', productId)
     form.setValue('user', userId!)
     form.setValue('isVerifiedPurchase', true)
 
@@ -308,7 +320,7 @@ export default function ReviewList({
         {/* RIGHT */}
         <div className='md:col-span-3 flex flex-col gap-3'>
           {reviews.map((review) => (
-            <Card key={review._id.toString()}>
+            <Card key={review._id}>
               <CardHeader>
                 <CardTitle>{review.title}</CardTitle>
                 <CardDescription>{review.comment}</CardDescription>
@@ -325,7 +337,9 @@ export default function ReviewList({
 
                   <div className='flex items-center'>
                     <Calendar className='mr-1 h-3 w-3' />
-                    {review.createdAt?.toString().substring(0, 10)}
+                    {review.createdAt
+                      ? new Date(review.createdAt).toLocaleDateString()
+                      : ''}
                   </div>
                 </div>
               </CardContent>
