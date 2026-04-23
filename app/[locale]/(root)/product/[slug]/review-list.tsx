@@ -36,7 +36,10 @@ import { Separator } from '@/components/ui/separator'
 import { IReviewDetails } from '@/types'
 
 /* ✅ SAFE TYPE */
-type RatingDistribution = Record<number, number>
+type RatingDistribution = {
+  rating: number
+  count: number
+}[]
 
 type ProductClient = {
   _id: string
