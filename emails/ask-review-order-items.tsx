@@ -33,12 +33,38 @@ type OrderItem = {
 type OrderEmailType = {
   _id: string
   createdAt?: Date
+  updatedAt?: Date
+
+  isPaid?: boolean
+  paidAt?: Date
+
   totalPrice: number
   itemsPrice: number
   taxPrice: number
   shippingPrice: number
+
+  paymentMethod?: string
+  expectedDeliveryDate?: Date
+  isDelivered?: boolean
+
+  user?: {
+    name: string
+    email: string
+  }
+
+  shippingAddress?: {
+    fullName: string
+    street: string
+    city: string
+    postalCode: string
+    country: string
+    phone: string
+    province: string
+  }
+
   items: OrderItem[]
 }
+
 type OrderInformationProps = {
   order: OrderEmailType
 }
