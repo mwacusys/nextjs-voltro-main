@@ -19,13 +19,10 @@ import ProductSlider from '@/components/shared/product/product-slider'
 import { getTranslations } from 'next-intl/server'
 
 /* ✅ STRICT TYPE */
-type RatingDistribution = {
-  1: number
-  2: number
-  3: number
-  4: number
-  5: number
-}
+export type RatingDistribution = {
+  rating: number
+  count: number
+}[]
 
 type ProductClient = {
   _id: string
@@ -47,18 +44,19 @@ type ProductClient = {
   colors: string[]
   tags: string[]
 }
+type RatingDistributionItem = {
+  rating: number
+  count: number
+}
 
 /* ✅ FIX: no `any` */
-function normalizeRatingDistribution(input: unknown): RatingDistribution {
-  const data = (input ?? {}) as Record<string, unknown>
-
-  return {
-    1: Number(data['1'] ?? 0),
-    2: Number(data['2'] ?? 0),
-    3: Number(data['3'] ?? 0),
-    4: Number(data['4'] ?? 0),
-    5: Number(data['5'] ?? 0),
-  }
+export function normalizeRatingDistribution(
+  data: Record<string, number>,
+): RatingDistributionItem[] {
+  return Object.entries(data || {}).map(([rating, count]) => ({
+    rating: Number(rating),
+    count: Number(count),
+  }))
 }
 
 /* ✅ METADATA */
@@ -106,7 +104,7 @@ export default async function ProductDetails({
     category: product.category,
     avgRating: product.avgRating,
     numReviews: product.numReviews,
-    ratingDistribution: normalizeRatingDistribution(product.ratingDistribution),
+    ratingDistribution: product.ratingDistribution,
 
     name: product.name,
     images: product.images,
