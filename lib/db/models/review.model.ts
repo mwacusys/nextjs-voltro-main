@@ -2,10 +2,15 @@ import { IReviewInput } from '@/types'
 import { Document, Model, model, models, Schema } from 'mongoose'
 
 export interface IReview extends Document, IReviewInput {
-  _id: string
   createdAt: Date
   updatedAt: Date
 }
+export type ReviewClient = {
+  _id: string
+  createdAt: string
+  updatedAt: string
+} & IReviewInput
+
 const reviewSchema = new Schema<IReview>(
   {
     user: {
@@ -38,7 +43,7 @@ const reviewSchema = new Schema<IReview>(
   },
   {
     timestamps: true,
-  }
+  },
 )
 
 const Review =
