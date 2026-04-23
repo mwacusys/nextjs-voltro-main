@@ -54,6 +54,10 @@ import RatingSummary from '@/components/shared/product/rating-summary'
 import { Separator } from '@/components/ui/separator'
 import { IReviewDetails } from '@/types'
 
+type RatingDistribution = {
+  [key: number]: number
+}
+
 /* ✅ SAFE FRONTEND TYPE */
 type ProductClient = {
   _id: string
@@ -61,7 +65,15 @@ type ProductClient = {
   category: string
   avgRating: number
   numReviews: number
-  ratingDistribution: any
+  ratingDistribution: RatingDistribution
+
+  // 👇 Add commonly used fields
+  name: string
+  images: string[]
+
+  // 👇 Optional (future safe)
+  price?: number
+  brand?: string
 }
 
 const reviewFormDefaultValues = {
