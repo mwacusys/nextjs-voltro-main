@@ -4,37 +4,22 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { Calendar, StarIcon, User } from 'lucide-react'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import { SubmitHandler, useForm } from 'react-hook-form'
+import { useForm, SubmitHandler } from 'react-hook-form'
 import { useInView } from 'react-intersection-observer'
 import { z } from 'zod'
 import { useTranslations } from 'next-intl'
 
 import Rating from '@/components/shared/product/rating'
 import { Button } from '@/components/ui/button'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
+import { Form, FormControl, FormField } from '@/components/ui/form'
 import {
   Select,
   SelectContent,
@@ -42,117 +27,90 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Textarea } from '@/components/ui/textarea'
+
 import { useToast } from '@/hooks/use-toast'
-import {
-  createUpdateReview,
-  getReviewByProductId,
-  getReviews,
-} from '@/lib/actions/review.actions'
+import { createUpdateReview, getReviews } from '@/lib/actions/review.actions'
 import { ReviewInputSchema } from '@/lib/validator'
 import RatingSummary from '@/components/shared/product/rating-summary'
 import { Separator } from '@/components/ui/separator'
 import { IReviewDetails } from '@/types'
 
-type RatingDistribution = {
-  [key: number]: number
-}
+/* ✅ SAFE TYPE */
+type RatingDistribution = Record<number, number>
 
-/* ✅ SAFE FRONTEND TYPE */
 type ProductClient = {
   _id: string
   slug: string
-  category: string
   avgRating: number
   numReviews: number
   ratingDistribution: RatingDistribution
-
-  // 👇 Add commonly used fields
-  name: string
-  images: string[]
-
-  // 👇 Optional (future safe)
-  price?: number
-  brand?: string
-}
-
-const reviewFormDefaultValues = {
-  title: '',
-  comment: '',
-  rating: 0,
 }
 
 export default function ReviewList({
   userId,
   product,
 }: {
-  userId: string | undefined
+  userId?: string
   product: ProductClient
 }) {
   const t = useTranslations('Product')
   const { toast } = useToast()
 
-  const productId = product._id // ✅ already string
+  const productId = product._id
 
+  const [reviews, setReviews] = useState<IReviewDetails[]>([])
   const [page, setPage] = useState(2)
   const [totalPages, setTotalPages] = useState(0)
-  const [reviews, setReviews] = useState<IReviewDetails[]>([])
-  const [loadingReviews, setLoadingReviews] = useState(false)
+  const [loading, setLoading] = useState(false)
 
   const { ref, inView } = useInView({ triggerOnce: true })
 
-  /* 🔁 Reload */
-  const reload = async () => {
-    try {
+  /* 🔁 INITIAL LOAD */
+  useEffect(() => {
+    if (!inView) return
+
+    const load = async () => {
+      setLoading(true)
       const res = await getReviews({ productId, page: 1 })
       setReviews(res.data)
       setTotalPages(res.totalPages)
-    } catch {
-      toast({
-        variant: 'destructive',
-        description: t('Error in fetching reviews'),
-      })
+      setLoading(false)
     }
-  }
 
-  /* 🔁 Load more */
-  const loadMoreReviews = async () => {
-    if (page > totalPages || loadingReviews) return
+    load()
+  }, [inView, productId])
 
-    setLoadingReviews(true)
+  /* 🔁 LOAD MORE */
+  const loadMore = async () => {
+    if (page > totalPages || loading) return
+
+    setLoading(true)
     const res = await getReviews({ productId, page })
 
     setReviews((prev) => [...prev, ...res.data])
-    setTotalPages(res.totalPages)
-    setPage((prev) => prev + 1)
-
-    setLoadingReviews(false)
+    setPage((p) => p + 1)
+    setLoading(false)
   }
 
-  /* 🔁 Initial load */
-  useEffect(() => {
-    const loadReviews = async () => {
-      setLoadingReviews(true)
-      const res = await getReviews({ productId, page: 1 })
-      setReviews(res.data)
-      setTotalPages(res.totalPages)
-      setLoadingReviews(false)
-    }
+  /* 🔁 RELOAD AFTER SUBMIT */
+  const reload = async () => {
+    const res = await getReviews({ productId, page: 1 })
+    setReviews(res.data)
+    setTotalPages(res.totalPages)
+    setPage(2)
+  }
 
-    if (inView) loadReviews()
-  }, [inView, productId])
+  /* 🧾 FORM */
+  type FormData = z.infer<typeof ReviewInputSchema>
 
-  /* 🧾 Form */
-  type CustomerReview = z.infer<typeof ReviewInputSchema>
-
-  const form = useForm<CustomerReview>({
+  const form = useForm<FormData>({
     resolver: zodResolver(ReviewInputSchema),
-    defaultValues: reviewFormDefaultValues,
+    defaultValues: { title: '', comment: '', rating: 0 },
   })
 
   const [open, setOpen] = useState(false)
 
-  const onSubmit: SubmitHandler<CustomerReview> = async (values) => {
+  const onSubmit: SubmitHandler<FormData> = async (values) => {
     const res = await createUpdateReview({
       data: { ...values, product: productId },
       path: `/product/${product.slug}`,
@@ -166,208 +124,104 @@ export default function ReviewList({
     }
 
     setOpen(false)
-    reload()
+    await reload()
 
-    toast({
-      description: res.message,
-    })
-  }
-
-  const handleOpenForm = async () => {
-    form.setValue('product', productId)
-    form.setValue('user', userId!)
-    form.setValue('isVerifiedPurchase', true)
-
-    const review = await getReviewByProductId({ productId })
-
-    if (review) {
-      form.setValue('title', review.title)
-      form.setValue('comment', review.comment)
-      form.setValue('rating', review.rating)
-    }
-
-    setOpen(true)
+    toast({ description: res.message })
   }
 
   return (
-    <div className='space-y-2'>
-      {reviews.length === 0 && <div>{t('No reviews yet')}</div>}
+    <div className='space-y-4'>
+      {/* SUMMARY */}
+      {reviews.length > 0 && (
+        <RatingSummary
+          avgRating={product.avgRating}
+          numReviews={product.numReviews}
+          ratingDistribution={product.ratingDistribution}
+        />
+      )}
 
-      <div className='grid grid-cols-1 md:grid-cols-4 gap-8'>
-        {/* LEFT */}
-        <div className='flex flex-col gap-2'>
-          {reviews.length !== 0 && (
-            <RatingSummary
-              avgRating={product.avgRating}
-              numReviews={product.numReviews}
-              ratingDistribution={product.ratingDistribution}
-            />
-          )}
+      <Separator />
 
-          <Separator className='my-3' />
+      {/* REVIEW FORM */}
+      {userId ? (
+        <Dialog open={open} onOpenChange={setOpen}>
+          <Button onClick={() => setOpen(true)}>
+            {t('Write a customer review')}
+          </Button>
 
-          <div className='space-y-3'>
-            <h3 className='font-bold text-lg'>{t('Review this product')}</h3>
+          <DialogContent>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)}>
+                <DialogHeader>
+                  <DialogTitle>{t('Write a review')}</DialogTitle>
+                </DialogHeader>
 
-            <p className='text-sm'>
-              {t('Share your thoughts with other customers')}
-            </p>
+                <FormField
+                  control={form.control}
+                  name='rating'
+                  render={({ field }) => (
+                    <Select
+                      onValueChange={(v) => field.onChange(Number(v))}
+                      value={String(field.value)}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder='Select rating' />
+                        </SelectTrigger>
+                      </FormControl>
 
-            {userId ? (
-              <Dialog open={open} onOpenChange={setOpen}>
-                <Button
-                  onClick={handleOpenForm}
-                  variant='outline'
-                  className='rounded-full w-full'
-                >
-                  {t('Write a customer review')}
-                </Button>
+                      <SelectContent>
+                        {[1, 2, 3, 4, 5].map((n) => (
+                          <SelectItem key={n} value={n.toString()}>
+                            {n} <StarIcon className='inline w-4 h-4 ml-1' />
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
 
-                <DialogContent>
-                  <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)}>
-                      <DialogHeader>
-                        <DialogTitle>
-                          {t('Write a customer review')}
-                        </DialogTitle>
-                        <DialogDescription>
-                          {t('Share your thoughts with other customers')}
-                        </DialogDescription>
-                      </DialogHeader>
+                <DialogFooter>
+                  <Button type='submit'>{t('Submit')}</Button>
+                </DialogFooter>
+              </form>
+            </Form>
+          </DialogContent>
+        </Dialog>
+      ) : (
+        <Link href={`/sign-in?callbackUrl=/product/${product.slug}`}>
+          {t('Sign in to review')}
+        </Link>
+      )}
 
-                      <div className='grid gap-4 py-4'>
-                        <FormField
-                          control={form.control}
-                          name='title'
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>{t('Title')}</FormLabel>
-                              <FormControl>
-                                <Input {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
+      {/* REVIEWS LIST */}
+      {reviews.map((r) => (
+        <Card key={String(r._id)}>
+          <CardHeader>
+            <CardTitle>{r.title}</CardTitle>
+          </CardHeader>
 
-                        <FormField
-                          control={form.control}
-                          name='comment'
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>{t('Comment')}</FormLabel>
-                              <FormControl>
-                                <Textarea {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
+          <CardContent>
+            <Rating rating={r.rating} />
 
-                        <FormField
-                          control={form.control}
-                          name='rating'
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>{t('Rating')}</FormLabel>
-                              <Select
-                                onValueChange={field.onChange}
-                                value={field.value.toString()}
-                              >
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue />
-                                  </SelectTrigger>
-                                </FormControl>
+            <div className='flex gap-2 text-sm items-center'>
+              <User className='w-4 h-4' />
+              {r.user?.name || t('Deleted User')}
 
-                                <SelectContent>
-                                  {[1, 2, 3, 4, 5].map((num) => (
-                                    <SelectItem
-                                      key={num}
-                                      value={num.toString()}
-                                    >
-                                      <div className='flex items-center gap-1'>
-                                        {num} <StarIcon className='h-4 w-4' />
-                                      </div>
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
+              <Calendar className='w-4 h-4 ml-2' />
+              {r.createdAt ? new Date(r.createdAt).toLocaleDateString() : ''}
+            </div>
+          </CardContent>
+        </Card>
+      ))}
 
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-
-                      <DialogFooter>
-                        <Button
-                          type='submit'
-                          disabled={form.formState.isSubmitting}
-                        >
-                          {form.formState.isSubmitting
-                            ? t('Submitting...')
-                            : t('Submit')}
-                        </Button>
-                      </DialogFooter>
-                    </form>
-                  </Form>
-                </DialogContent>
-              </Dialog>
-            ) : (
-              <div>
-                {t('Please')}{' '}
-                <Link
-                  href={`/sign-in?callbackUrl=/product/${product.slug}`}
-                  className='highlight-link'
-                >
-                  {t('sign in')}
-                </Link>{' '}
-                {t('to write a review')}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* RIGHT */}
-        <div className='md:col-span-3 flex flex-col gap-3'>
-          {reviews.map((review) => (
-            <Card key={review._id}>
-              <CardHeader>
-                <CardTitle>{review.title}</CardTitle>
-                <CardDescription>{review.comment}</CardDescription>
-              </CardHeader>
-
-              <CardContent>
-                <div className='flex space-x-4 text-sm text-muted-foreground'>
-                  <Rating rating={review.rating} />
-
-                  <div className='flex items-center'>
-                    <User className='mr-1 h-3 w-3' />
-                    {review.user?.name || t('Deleted User')}
-                  </div>
-
-                  <div className='flex items-center'>
-                    <Calendar className='mr-1 h-3 w-3' />
-                    {review.createdAt
-                      ? new Date(review.createdAt).toLocaleDateString()
-                      : ''}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-
-          <div ref={ref}>
-            {page <= totalPages && (
-              <Button variant='link' onClick={loadMoreReviews}>
-                {t('See more reviews')}
-              </Button>
-            )}
-
-            {loadingReviews && t('Loading')}
-          </div>
-        </div>
+      {/* LOAD MORE */}
+      <div ref={ref}>
+        {page <= totalPages && (
+          <Button variant='link' onClick={loadMore}>
+            {loading ? t('Loading') : t('See more reviews')}
+          </Button>
+        )}
       </div>
     </div>
   )
