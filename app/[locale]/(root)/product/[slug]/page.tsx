@@ -18,8 +18,14 @@ import RatingSummary from '@/components/shared/product/rating-summary'
 import ProductSlider from '@/components/shared/product/product-slider'
 import { getTranslations } from 'next-intl/server'
 
-/* ✅ SAFE TYPE */
-type RatingDistribution = Record<number, number>
+/* ✅ STRICT TYPE */
+type RatingDistribution = {
+  1: number
+  2: number
+  3: number
+  4: number
+  5: number
+}
 
 type ProductClient = {
   _id: string
@@ -42,23 +48,27 @@ type ProductClient = {
   tags: string[]
 }
 
-/* ✅ Normalize Mongo object safely */
-function normalizeRatingDistribution(input: any): RatingDistribution {
+/* ✅ FIX: no `any` */
+function normalizeRatingDistribution(input: unknown): RatingDistribution {
+  const data = (input ?? {}) as Record<string, unknown>
+
   return {
-    1: Number(input?.[1] ?? input?.['1'] ?? 0),
-    2: Number(input?.[2] ?? input?.['2'] ?? 0),
-    3: Number(input?.[3] ?? input?.['3'] ?? 0),
-    4: Number(input?.[4] ?? input?.['4'] ?? 0),
-    5: Number(input?.[5] ?? input?.['5'] ?? 0),
+    1: Number(data['1'] ?? 0),
+    2: Number(data['2'] ?? 0),
+    3: Number(data['3'] ?? 0),
+    4: Number(data['4'] ?? 0),
+    5: Number(data['5'] ?? 0),
   }
 }
 
-/* ✅ Metadata */
-export async function generateMetadata(props: {
+/* ✅ METADATA */
+export async function generateMetadata({
+  params,
+}: {
   params: Promise<{ slug: string }>
 }) {
   const t = await getTranslations()
-  const { slug } = await props.params
+  const { slug } = await params
 
   const product = await getProductBySlug(slug)
 
@@ -73,12 +83,15 @@ export async function generateMetadata(props: {
 }
 
 /* ✅ PAGE */
-export default async function ProductDetails(props: {
+export default async function ProductDetails({
+  params,
+  searchParams,
+}: {
   params: Promise<{ slug: string }>
   searchParams: Promise<{ page?: string; color?: string; size?: string }>
 }) {
-  const { page, color, size } = await props.searchParams
-  const { slug } = await props.params
+  const { slug } = await params
+  const { page, color, size } = await searchParams
 
   const session = await auth()
 
@@ -87,7 +100,6 @@ export default async function ProductDetails(props: {
 
   const productId = product._id.toString()
 
-  /* ✅ CLIENT SAFE OBJECT */
   const productClient: ProductClient = {
     _id: productId,
     slug: product.slug,
@@ -110,7 +122,7 @@ export default async function ProductDetails(props: {
   }
 
   const relatedProducts = await getRelatedProductsByCategory({
-    category: productClient.category,
+    category: product.category,
     productId,
     page: Number(page || '1'),
   })
@@ -119,34 +131,25 @@ export default async function ProductDetails(props: {
 
   return (
     <div>
-      {/* HISTORY */}
-      <AddToBrowsingHistory
-        id={productClient._id}
-        category={productClient.category}
-      />
+      <AddToBrowsingHistory id={productId} category={product.category} />
 
-      {/* PRODUCT SECTION */}
+      {/* PRODUCT */}
       <section>
-        <div className='grid grid-cols-1 md:grid-cols-5 gap-6'>
-          {/* IMAGE */}
+        <div className='grid grid-cols-1 md:grid-cols-5'>
           <div className='col-span-2'>
-            <ProductGallery images={productClient.images} />
+            <ProductGallery images={product.images} />
           </div>
 
-          {/* DETAILS */}
-          <div className='flex flex-col gap-3 md:p-5 col-span-2'>
+          <div className='flex flex-col gap-2 md:p-5 col-span-2'>
             <p className='p-medium-16 rounded-full bg-grey-500/10 text-grey-500'>
-              {t('Product.Brand')} {productClient.brand}{' '}
-              {productClient.category}
+              {t('Product.Brand')} {product.brand} {product.category}
             </p>
 
-            <h1 className='font-bold text-lg lg:text-xl'>
-              {productClient.name}
-            </h1>
+            <h1 className='font-bold text-lg lg:text-xl'>{product.name}</h1>
 
             <RatingSummary
-              avgRating={productClient.avgRating}
-              numReviews={productClient.numReviews}
+              avgRating={product.avgRating}
+              numReviews={product.numReviews}
               ratingDistribution={productClient.ratingDistribution}
               asPopover
             />
@@ -154,60 +157,43 @@ export default async function ProductDetails(props: {
             <Separator />
 
             <ProductPrice
-              price={productClient.price}
-              listPrice={productClient.listPrice}
-              isDeal={productClient.tags.includes('todays-deal')}
+              price={product.price}
+              listPrice={product.listPrice}
+              isDeal={product.tags.includes('todays-deal')}
               forListing={false}
             />
 
             <SelectVariant
-              product={productClient}
-              size={size || productClient.sizes?.[0] || ''}
-              color={color || productClient.colors?.[0] || ''}
+              product={product}
+              size={size || product.sizes[0]}
+              color={color || product.colors[0]}
             />
 
             <Separator />
 
-            <p>{productClient.description}</p>
+            <p>{product.description}</p>
           </div>
 
-          {/* BUY CARD */}
+          {/* BUY */}
           <div>
             <Card>
               <CardContent className='p-4 flex flex-col gap-4'>
-                <ProductPrice price={productClient.price} />
+                <ProductPrice price={product.price} />
 
-                {/* STOCK INFO */}
-                {productClient.countInStock > 0 &&
-                  productClient.countInStock <= 3 && (
-                    <div className='text-destructive font-bold'>
-                      {t('Product.Only X left in stock - order soon', {
-                        count: productClient.countInStock,
-                      })}
-                    </div>
-                  )}
-
-                {productClient.countInStock === 0 && (
-                  <div className='text-destructive text-xl'>
-                    {t('Product.Out of Stock')}
-                  </div>
-                )}
-
-                {/* ADD TO CART */}
-                {productClient.countInStock !== 0 && (
+                {product.countInStock !== 0 && (
                   <AddToCart
                     item={{
                       clientId: generateId(),
-                      product: productClient._id,
-                      countInStock: productClient.countInStock,
-                      name: productClient.name,
-                      slug: productClient.slug,
-                      category: productClient.category,
-                      price: round2(productClient.price),
+                      product: productId,
+                      countInStock: product.countInStock,
+                      name: product.name,
+                      slug: product.slug,
+                      category: product.category,
+                      price: round2(product.price),
                       quantity: 1,
-                      image: productClient.images?.[0] || '',
-                      size: size || productClient.sizes?.[0] || '',
-                      color: color || productClient.colors?.[0] || '',
+                      image: product.images[0],
+                      size: size || product.sizes[0],
+                      color: color || product.colors[0],
                     }}
                   />
                 )}
@@ -219,22 +205,20 @@ export default async function ProductDetails(props: {
 
       {/* REVIEWS */}
       <section className='mt-10'>
-        <h2 className='h2-bold mb-2'>{t('Product.Customer Reviews')}</h2>
-
-        <ReviewList product={productClient} userId={session?.user.id} />
+        <ReviewList product={productClient} userId={session?.user?.id} />
       </section>
 
-      {/* RELATED PRODUCTS */}
+      {/* RELATED */}
       <section className='mt-10'>
         <ProductSlider
           products={relatedProducts.data}
           title={t('Product.Best Sellers in', {
-            name: productClient.category,
+            name: product.category,
           })}
         />
       </section>
 
-      {/* BROWSING HISTORY */}
+      {/* HISTORY */}
       <BrowsingHistoryList className='mt-10' />
     </div>
   )
