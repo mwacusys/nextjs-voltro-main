@@ -17,7 +17,6 @@ import BrowsingHistoryList from '@/components/shared/browsing-history-list'
 import RatingSummary from '@/components/shared/product/rating-summary'
 import ProductSlider from '@/components/shared/product/product-slider'
 import { getTranslations } from 'next-intl/server'
-import { normalizeRatingDistribution } from '@/lib/normalizeRatingDistribution'
 
 type ProductClient = {
   _id: string
@@ -40,7 +39,22 @@ type ProductClient = {
   colors: string[]
   tags: string[]
 }
-
+export type RatingDistributionItem = {
+  rating: number
+  count: number
+}
+export function normalizeRatingDistribution(
+  data?:
+    | {
+        [x: string]: number
+      }
+    | undefined,
+): RatingDistributionItem[] {
+  return Object.entries(data || {}).map(([rating, count]) => ({
+    rating: Number(rating),
+    count: Number(count),
+  }))
+}
 /* ✅ METADATA */
 export async function generateMetadata({
   params,
