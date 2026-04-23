@@ -1,4 +1,5 @@
 'use client'
+
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Calendar, Check, StarIcon, User } from 'lucide-react'
 import Link from 'next/link'
@@ -68,17 +69,23 @@ export default function ReviewList({
   product: IProduct
 }) {
   const t = useTranslations('Product')
+  const { toast } = useToast()
+
+  const productId = product._id.toString() // ✅ FIX ONCE
+
   const [page, setPage] = useState(2)
   const [totalPages, setTotalPages] = useState(0)
   const [reviews, setReviews] = useState<IReviewDetails[]>([])
+  const [loadingReviews, setLoadingReviews] = useState(false)
+
   const { ref, inView } = useInView({ triggerOnce: true })
+
   const reload = async () => {
     try {
-      const res = await getReviews({ productId: product._id, page: 1 })
-      setReviews([...res.data])
+      const res = await getReviews({ productId, page: 1 })
+      setReviews(res.data)
       setTotalPages(res.totalPages)
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (err) {
+    } catch {
       toast({
         variant: 'destructive',
         description: t('Error in fetching reviews'),
@@ -88,66 +95,74 @@ export default function ReviewList({
 
   const loadMoreReviews = async () => {
     if (totalPages !== 0 && page > totalPages) return
+
     setLoadingReviews(true)
-    const res = await getReviews({ productId: product._id, page })
+    const res = await getReviews({ productId, page })
     setLoadingReviews(false)
-    setReviews([...reviews, ...res.data])
+
+    setReviews((prev) => [...prev, ...res.data])
     setTotalPages(res.totalPages)
-    setPage(page + 1)
+    setPage((prev) => prev + 1)
   }
 
-  const [loadingReviews, setLoadingReviews] = useState(false)
   useEffect(() => {
     const loadReviews = async () => {
       setLoadingReviews(true)
-      const res = await getReviews({ productId: product._id, page: 1 })
-      setReviews([...res.data])
+      const res = await getReviews({ productId, page: 1 })
+      setReviews(res.data)
       setTotalPages(res.totalPages)
       setLoadingReviews(false)
     }
 
-    if (inView) {
-      loadReviews()
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [inView])
+    if (inView) loadReviews()
+  }, [inView, productId])
 
   type CustomerReview = z.infer<typeof ReviewInputSchema>
+
   const form = useForm<CustomerReview>({
     resolver: zodResolver(ReviewInputSchema),
     defaultValues: reviewFormDefaultValues,
   })
+
   const [open, setOpen] = useState(false)
-  const { toast } = useToast()
+
   const onSubmit: SubmitHandler<CustomerReview> = async (values) => {
     const res = await createUpdateReview({
-      data: { ...values, product: product._id },
+      data: { ...values, product: productId }, // ✅ FIX
       path: `/product/${product.slug}`,
     })
-    if (!res.success)
+
+    if (!res.success) {
       return toast({
         variant: 'destructive',
         description: res.message,
       })
+    }
+
     setOpen(false)
     reload()
+
     toast({
       description: res.message,
     })
   }
 
   const handleOpenForm = async () => {
-    form.setValue('product', product._id)
+    form.setValue('product', productId) // ✅ FIX
     form.setValue('user', userId!)
     form.setValue('isVerifiedPurchase', true)
-    const review = await getReviewByProductId({ productId: product._id })
+
+    const review = await getReviewByProductId({ productId }) // ✅ FIX
+
     if (review) {
       form.setValue('title', review.title)
       form.setValue('comment', review.comment)
       form.setValue('rating', review.rating)
     }
+
     setOpen(true)
   }
+
   return (
     <div className='space-y-2'>
       {reviews.length === 0 && <div>{t('No reviews yet')}</div>}
@@ -161,27 +176,31 @@ export default function ReviewList({
               ratingDistribution={product.ratingDistribution}
             />
           )}
+
           <Separator className='my-3' />
+
           <div className='space-y-3'>
             <h3 className='font-bold text-lg lg:text-xl'>
               {t('Review this product')}
             </h3>
+
             <p className='text-sm'>
               {t('Share your thoughts with other customers')}
             </p>
+
             {userId ? (
               <Dialog open={open} onOpenChange={setOpen}>
                 <Button
                   onClick={handleOpenForm}
                   variant='outline'
-                  className=' rounded-full w-full'
+                  className='rounded-full w-full'
                 >
                   {t('Write a customer review')}
                 </Button>
 
-                <DialogContent className='sm:max-w-[425px]'>
+                <DialogContent>
                   <Form {...form}>
-                    <form method='post' onSubmit={form.handleSubmit(onSubmit)}>
+                    <form onSubmit={form.handleSubmit(onSubmit)}>
                       <DialogHeader>
                         <DialogTitle>
                           {t('Write a customer review')}
@@ -190,90 +209,69 @@ export default function ReviewList({
                           {t('Share your thoughts with other customers')}
                         </DialogDescription>
                       </DialogHeader>
+
                       <div className='grid gap-4 py-4'>
-                        <div className='flex flex-col gap-5  '>
-                          <FormField
-                            control={form.control}
-                            name='title'
-                            render={({ field }) => (
-                              <FormItem className='w-full'>
-                                <FormLabel>{t('Title')}</FormLabel>
-                                <FormControl>
-                                  <Input
-                                    placeholder={t('Enter title')}
-                                    {...field}
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
+                        <FormField
+                          control={form.control}
+                          name='title'
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>{t('Title')}</FormLabel>
+                              <FormControl>
+                                <Input {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
 
-                          <FormField
-                            control={form.control}
-                            name='comment'
-                            render={({ field }) => (
-                              <FormItem className='w-full'>
-                                <FormLabel>{t('Comment')}</FormLabel>
-                                <FormControl>
-                                  <Textarea
-                                    placeholder={t('Enter comment')}
-                                    {...field}
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </div>
-                        <div>
-                          <FormField
-                            control={form.control}
-                            name='rating'
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>{t('Rating')}</FormLabel>
-                                <Select
-                                  onValueChange={field.onChange}
-                                  value={field.value.toString()}
-                                >
-                                  <FormControl>
-                                    <SelectTrigger>
-                                      <SelectValue
-                                        placeholder={t('Select a rating')}
-                                      />
-                                    </SelectTrigger>
-                                  </FormControl>
-                                  <SelectContent>
-                                    {Array.from({ length: 5 }).map(
-                                      (_, index) => (
-                                        <SelectItem
-                                          key={index}
-                                          value={(index + 1).toString()}
-                                        >
-                                          <div className='flex items-center gap-1'>
-                                            {index + 1}{' '}
-                                            <StarIcon className='h-4 w-4' />
-                                          </div>
-                                        </SelectItem>
-                                      )
-                                    )}
-                                  </SelectContent>
-                                </Select>
+                        <FormField
+                          control={form.control}
+                          name='comment'
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>{t('Comment')}</FormLabel>
+                              <FormControl>
+                                <Textarea {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
 
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </div>
+                        <FormField
+                          control={form.control}
+                          name='rating'
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>{t('Rating')}</FormLabel>
+                              <Select
+                                onValueChange={field.onChange}
+                                value={field.value.toString()}
+                              >
+                                <SelectTrigger>
+                                  <SelectValue />
+                                </SelectTrigger>
+
+                                <SelectContent>
+                                  {Array.from({ length: 5 }).map((_, i) => (
+                                    <SelectItem
+                                      key={i}
+                                      value={(i + 1).toString()}
+                                    >
+                                      {i + 1} <StarIcon className='h-4 w-4' />
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
                       </div>
 
                       <DialogFooter>
-                        <Button
-                          type='submit'
-                          size='lg'
-                          disabled={form.formState.isSubmitting}
-                        >
+                        <Button type='submit'>
                           {form.formState.isSubmitting
                             ? t('Submitting...')
                             : t('Submit')}
@@ -286,10 +284,7 @@ export default function ReviewList({
             ) : (
               <div>
                 {t('Please')}{' '}
-                <Link
-                  href={`/sign-in?callbackUrl=/product/${product.slug}`}
-                  className='highlight-link'
-                >
+                <Link href={`/sign-in?callbackUrl=/product/${product.slug}`}>
                   {t('sign in')}
                 </Link>{' '}
                 {t('to write a review')}
@@ -297,41 +292,34 @@ export default function ReviewList({
             )}
           </div>
         </div>
+
         <div className='md:col-span-3 flex flex-col gap-3'>
-          {reviews.map((review: IReviewDetails) => (
+          {reviews.map((review) => (
             <Card key={review._id}>
               <CardHeader>
-                <div className='flex-between'>
-                  <CardTitle>{review.title}</CardTitle>
-                  <div className='italic text-sm flex'>
-                    <Check className='h-4 w-4' /> {t('Verified Purchase')}
-                  </div>
-                </div>
+                <CardTitle>{review.title}</CardTitle>
                 <CardDescription>{review.comment}</CardDescription>
               </CardHeader>
+
               <CardContent>
-                <div className='flex space-x-4 text-sm text-muted-foreground'>
+                <div className='flex gap-4 text-sm'>
                   <Rating rating={review.rating} />
-                  <div className='flex items-center'>
-                    <User className='mr-1 h-3 w-3' />
-                    {review.user ? review.user.name : t('Deleted User')}
-                  </div>
-                  <div className='flex items-center'>
-                    <Calendar className='mr-1 h-3 w-3' />
-                    {review.createdAt.toString().substring(0, 10)}
-                  </div>
+                  <span>{review.user?.name || t('Deleted User')}</span>
+                  <span>
+                    {new Date(review.createdAt).toISOString().substring(0, 10)}
+                  </span>
                 </div>
               </CardContent>
             </Card>
           ))}
+
           <div ref={ref}>
             {page <= totalPages && (
-              <Button variant={'link'} onClick={loadMoreReviews}>
+              <Button variant='link' onClick={loadMoreReviews}>
                 {t('See more reviews')}
               </Button>
             )}
-
-            {page < totalPages && loadingReviews && t('Loading')}
+            {loadingReviews && t('Loading')}
           </div>
         </div>
       </div>
