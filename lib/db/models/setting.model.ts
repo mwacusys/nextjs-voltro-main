@@ -2,10 +2,14 @@ import { ISettingInput } from '@/types'
 import { Document, Model, model, models, Schema } from 'mongoose'
 
 export interface ISetting extends Document, ISettingInput {
-  _id: string
   createdAt: Date
   updatedAt: Date
 }
+export type SettingClient = {
+  _id: string
+  createdAt: string
+  updatedAt: string
+} & ISettingInput
 
 const settingSchema = new Schema<ISetting>(
   {
@@ -97,7 +101,7 @@ const settingSchema = new Schema<ISetting>(
   },
   {
     timestamps: true,
-  }
+  },
 )
 
 const Setting =
