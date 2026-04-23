@@ -1,8 +1,7 @@
-import { Document, Model, model, models, Schema } from 'mongoose'
 import { IProductInput } from '@/types'
+import { Document, Model, Schema, model, models } from 'mongoose'
 
 export interface IProduct extends Document, IProductInput {
-  _id: string
   createdAt: Date
   updatedAt: Date
 }
@@ -88,7 +87,7 @@ const productSchema = new Schema<IProduct>(
   },
   {
     timestamps: true,
-  }
+  },
 )
 
 const Product =
