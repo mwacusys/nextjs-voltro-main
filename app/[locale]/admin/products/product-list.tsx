@@ -126,10 +126,10 @@ const ProductList = () => {
             </TableHeader>
             <TableBody>
               {data?.products.map((product: IProduct) => (
-                <TableRow key={product._id}>
-                  <TableCell>{formatId(product._id)}</TableCell>
+                <TableRow key={product._id.toString()}>
+                  <TableCell>{formatId(product._id.toString())}</TableCell>
                   <TableCell>
-                    <Link href={`/admin/products/${product._id}`}>
+                    <Link href={`/admin/products/${product._id.toString()}`}>
                       {product.name}
                     </Link>
                   </TableCell>
@@ -143,7 +143,9 @@ const ProductList = () => {
                   </TableCell>
                   <TableCell className='flex gap-1'>
                     <Button asChild variant='outline' size='sm'>
-                      <Link href={`/admin/products/${product._id}`}>Edit</Link>
+                      <Link href={`/admin/products/${product._id.toString()}`}>
+                        Edit
+                      </Link>
                     </Button>
                     <Button asChild variant='outline' size='sm'>
                       <Link target='_blank' href={`/product/${product.slug}`}>
@@ -151,7 +153,7 @@ const ProductList = () => {
                       </Link>
                     </Button>
                     <DeleteDialog
-                      id={product._id}
+                      id={product._id.toString()}
                       action={deleteProduct}
                       callbackAction={() => {
                         startTransition(async () => {
