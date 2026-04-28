@@ -71,7 +71,29 @@ export default async function Sidebar({
           <div className='flex-1 overflow-y-auto'>
             <div className='p-4 border-b'>
               <h2 className='text-lg font-semibold'>
-                {t('Header.Shop By Department')}
+                {t('Header.Shop By Category')}
+              </h2>
+            </div>
+            <nav className='flex flex-col'>
+              {categories.map((category) => (
+                <DrawerClose asChild key={category}>
+                  <Link
+                    href={`/search?category=${category}`}
+                    className={`flex items-center justify-between item-button`}
+                  >
+                    <span>{category}</span>
+                    <ChevronRight className='h-4 w-4' />
+                  </Link>
+                </DrawerClose>
+              ))}
+            </nav>
+          </div>
+
+          {/* Shop By Trending */}
+          <div className='flex-1 overflow-y-auto'>
+            <div className='p-4 border-b'>
+              <h2 className='text-lg font-semibold'>
+                {t('Header.Shop By Trending')}
               </h2>
             </div>
             <nav className='flex flex-col'>
