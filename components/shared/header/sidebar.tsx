@@ -30,12 +30,12 @@ export default async function Sidebar({
   const t = await getTranslations()
 
   const menu: CategoryGroup[] = [
-    { title: t('Header.Shop By Battery'), items: categories },
-    { title: t('Header.Shop By BMS'), items: categories },
-    { title: t('Header.Shop By Embedded'), items: categories },
-    { title: t('Header.Shop By Chargers'), items: categories },
-    { title: t('Header.Shop By Power Conversion Systems'), items: categories },
-    { title: t('Header.Shop By Components'), items: categories },
+    { title: t('Header.Battery'), items: categories },
+    { title: t('Header.BMS'), items: categories },
+    { title: t('Header.Embedded'), items: categories },
+    { title: t('Header.Chargers'), items: categories },
+    { title: t('Header.Power Conversion Systems'), items: categories },
+    { title: t('Header.Components'), items: categories },
   ]
 
   return (
