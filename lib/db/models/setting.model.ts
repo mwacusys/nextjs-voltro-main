@@ -1,12 +1,13 @@
 import { ISettingInput } from '@/types'
 import { Document, Model, model, models, Schema } from 'mongoose'
+import { Types } from 'mongoose'
 
 export interface ISetting extends Document, ISettingInput {
   createdAt: Date
   updatedAt: Date
 }
 export type SettingClient = {
-  _id: string
+  _id: Types.ObjectId
   createdAt: string
   updatedAt: string
 } & ISettingInput

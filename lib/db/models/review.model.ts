@@ -1,12 +1,12 @@
 import { IReviewInput } from '@/types'
-import { Document, Model, model, models, Schema } from 'mongoose'
+import { Document, Model, model, models, Schema, Types } from 'mongoose'
 
 export interface IReview extends Document, IReviewInput {
   createdAt: Date
   updatedAt: Date
 }
 export type ReviewClient = {
-  _id: string
+  _id: Types.ObjectId
   createdAt: string
   updatedAt: string
 } & IReviewInput

@@ -1,12 +1,13 @@
 import { IWebPageInput } from '@/types'
 import { Document, Model, model, models, Schema } from 'mongoose'
+import { Types } from 'mongoose'
 
 export interface IWebPage extends Document, IWebPageInput {
   createdAt: Date
   updatedAt: Date
 }
 export type WebPageClient = {
-  _id: string
+  _id: Types.ObjectId
   createdAt: string
   updatedAt: string
 } & IWebPageInput

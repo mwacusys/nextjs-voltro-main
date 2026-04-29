@@ -1,12 +1,12 @@
 import { IUserInput } from '@/types'
-import { Document, Model, model, models, Schema } from 'mongoose'
+import { Document, Model, model, models, Schema, Types } from 'mongoose'
 
 export interface IUser extends Document, IUserInput {
   createdAt: Date
   updatedAt: Date
 }
 export type UserClient = {
-  _id: string
+  _id: Types.ObjectId
   createdAt: string
   updatedAt: string
 } & IUserInput

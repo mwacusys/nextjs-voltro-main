@@ -1,6 +1,7 @@
 import * as React from 'react'
 import Link from 'next/link'
 import { X, ChevronRight, UserCircle, MenuIcon } from 'lucide-react'
+
 import { Button } from '@/components/ui/button'
 import { SignOut } from '@/lib/actions/user.actions'
 import {
@@ -11,9 +12,12 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from '@/components/ui/drawer'
+
 import { auth } from '@/auth'
 import { getLocale, getTranslations } from 'next-intl/server'
 import { getDirection } from '@/i18n-config'
+
+import { CategoryNode } from '@/components/category/category-sidebar'
 
 type CategoryGroup = {
   title: string
@@ -23,19 +27,22 @@ type CategoryGroup = {
 export default async function Sidebar({
   categories,
 }: {
-  categories: string[]
+  categories: CategoryNode[]
 }) {
   const session = await auth()
   const locale = await getLocale()
   const t = await getTranslations()
 
+  // flatten categories safely for now
+  const categoryNames = categories.map((c) => c.name)
+
   const menu: CategoryGroup[] = [
-    { title: t('Header.Battery'), items: categories },
-    { title: t('Header.BMS'), items: categories },
-    { title: t('Header.Embedded'), items: categories },
-    { title: t('Header.Chargers'), items: categories },
-    { title: t('Header.Power Conversion Systems'), items: categories },
-    { title: t('Header.Components'), items: categories },
+    { title: t('Header.Battery'), items: categoryNames },
+    { title: t('Header.BMS'), items: categoryNames },
+    { title: t('Header.Embedded'), items: categoryNames },
+    { title: t('Header.Chargers'), items: categoryNames },
+    { title: t('Header.Power Conversion Systems'), items: categoryNames },
+    { title: t('Header.Components'), items: categoryNames },
   ]
 
   return (
@@ -49,11 +56,12 @@ export default async function Sidebar({
       {/* 📦 Sidebar */}
       <DrawerContent className='w-[350px] mt-0 top-0 border-r border-gray-300 shadow-lg'>
         <div className='flex flex-col h-screen'>
-          {/* ✅ HEADER */}
+          {/* HEADER */}
           <div className='bg-gray-800 text-white flex items-center justify-between'>
             <DrawerHeader>
               <DrawerTitle className='flex items-center'>
                 <UserCircle className='h-6 w-6 mr-2' />
+
                 {session ? (
                   <DrawerClose asChild>
                     <Link href='/account'>
@@ -81,9 +89,9 @@ export default async function Sidebar({
             </DrawerClose>
           </div>
 
-          {/* ✅ SINGLE SCROLL AREA */}
+          {/* CONTENT */}
           <div className='flex-1 overflow-y-auto pb-6'>
-            {/* 🔹 CATEGORY SECTIONS */}
+            {/* CATEGORY SECTIONS */}
             {menu.map((group, index) => (
               <div key={index}>
                 <div className='p-4 border-b'>
@@ -106,7 +114,7 @@ export default async function Sidebar({
               </div>
             ))}
 
-            {/* ✅ HELP & SETTINGS */}
+            {/* HELP SECTION */}
             <div className='border-t mt-4'>
               <div className='p-4'>
                 <h2 className='text-lg font-semibold'>

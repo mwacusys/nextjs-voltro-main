@@ -11,7 +11,7 @@ const Price = (field: string) =>
     .number()
     .refine(
       (value) => /^\d+(\.\d{2})?$/.test(formatNumberWithDecimal(value)),
-      `${field} must have exactly two decimal places (e.g., 49.99)`
+      `${field} must have exactly two decimal places (e.g., 49.99)`,
     )
 
 export const ReviewInputSchema = z.object({
@@ -28,38 +28,39 @@ export const ReviewInputSchema = z.object({
 })
 
 export const ProductInputSchema = z.object({
-  name: z.string().min(3, 'Name must be at least 3 characters'),
-  slug: z.string().min(3, 'Slug must be at least 3 characters'),
-  category: z.string().min(1, 'Category is required'),
-  images: z.array(z.string()).min(1, 'Product must have at least one image'),
-  brand: z.string().min(1, 'Brand is required'),
-  description: z.string().min(1, 'Description is required'),
+  name: z.string(),
+  slug: z.string(),
+
+  category: z.string(),
+  subcategory: z.string().optional(),
+  subSubcategory: z.string().optional(),
+
+  images: z.array(z.string()),
+  brand: z.string(),
+  description: z.string().optional(),
+
+  price: z.number(),
+  listPrice: z.number(),
+  countInStock: z.number(),
+
+  tags: z.array(z.string()),
+  colors: z.array(z.string()),
+  sizes: z.array(z.string()),
+
+  avgRating: z.number(),
+  numReviews: z.number(),
+
+  ratingDistribution: z.array(
+    z.object({
+      rating: z.number(),
+      count: z.number(),
+    }),
+  ),
+
+  numSales: z.number(),
   isPublished: z.boolean(),
-  price: Price('Price'),
-  listPrice: Price('List price'),
-  countInStock: z.coerce
-    .number()
-    .int()
-    .nonnegative('count in stock must be a non-negative number'),
-  tags: z.array(z.string()).default([]),
-  sizes: z.array(z.string()).default([]),
-  colors: z.array(z.string()).default([]),
-  avgRating: z.coerce
-    .number()
-    .min(0, 'Average rating must be at least 0')
-    .max(5, 'Average rating must be at most 5'),
-  numReviews: z.coerce
-    .number()
-    .int()
-    .nonnegative('Number of reviews must be a non-negative number'),
-  ratingDistribution: z
-    .array(z.object({ rating: z.number(), count: z.number() }))
-    .max(5),
-  reviews: z.array(ReviewInputSchema).default([]),
-  numSales: z.coerce
-    .number()
-    .int()
-    .nonnegative('Number of sales must be a non-negative number'),
+
+  reviews: z.array(z.any()).optional(),
 })
 
 export const ProductUpdateSchema = ProductInputSchema.extend({
@@ -126,7 +127,7 @@ export const OrderInputSchema = z.object({
     .date()
     .refine(
       (value) => value > new Date(),
-      'Expected delivery date must be in the future'
+      'Expected delivery date must be in the future',
     ),
   isDelivered: z.boolean().default(false),
   deliveredAt: z.date().optional(),
