@@ -3,6 +3,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
+import { useLocale } from 'next-intl'
 import { useForm } from 'react-hook-form'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -47,6 +48,13 @@ const productDefaultValues: IProductInput = {
   reviews: [],
 }
 
+const tagOptions = [
+  { label: 'New Arrival', value: 'new-arrival' },
+  { label: 'Best Seller', value: 'best-seller' },
+  { label: 'Featured', value: 'featured' },
+  { label: "Today's Deal", value: 'todays-deal' },
+]
+
 const ProductForm = ({
   type,
   product,
@@ -57,6 +65,7 @@ const ProductForm = ({
   productId?: string
 }) => {
   const router = useRouter()
+  const locale = useLocale()
   const { toast } = useToast()
 
   const form = useForm<IProductInput>({
@@ -82,16 +91,13 @@ const ProductForm = ({
         return
       }
 
-      toast({
-        description: res.message,
-      })
-
-      router.push('/admin/products')
+      toast({ description: res.message })
+      router.push(`/${locale}/admin/products`)
     }
 
     if (type === 'Update') {
       if (!productId) {
-        router.push('/admin/products')
+        router.push(`/${locale}/admin/products`)
         return
       }
 
@@ -105,11 +111,8 @@ const ProductForm = ({
         return
       }
 
-      toast({
-        description: res.message,
-      })
-
-      router.push('/admin/products')
+      toast({ description: res.message })
+      router.push(`/${locale}/admin/products`)
     }
   }
 
@@ -150,9 +153,9 @@ const ProductForm = ({
                     />
                     <button
                       type='button'
-                      onClick={() => {
+                      onClick={() =>
                         form.setValue('slug', toSlug(form.getValues('name')))
-                      }}
+                      }
                       className='absolute right-2 top-2.5'
                     >
                       Generate
@@ -243,130 +246,161 @@ const ProductForm = ({
           />
         </div>
 
-        <div className='flex flex-col gap-5 md:flex-row'>
-          <FormField
-            control={form.control}
-            name='images'
-            render={() => (
-              <FormItem className='w-full'>
-                <FormLabel>Images</FormLabel>
+        <FormField
+          control={form.control}
+          name='images'
+          render={() => (
+            <FormItem className='w-full'>
+              <FormLabel>Images</FormLabel>
+              <Card>
+                <CardContent className='space-y-4 mt-2 min-h-48'>
+                  {images.length === 0 && (
+                    <p className='text-sm text-gray-500'>
+                      No images uploaded
+                    </p>
+                  )}
 
-                <Card>
-                  <CardContent className='space-y-4 mt-2 min-h-48'>
-                    {images.length === 0 && (
-                      <p className='text-sm text-gray-500'>
-                        No images uploaded
-                      </p>
-                    )}
-
-                    <div className='flex flex-wrap justify-start items-center gap-4'>
-                      {images.map((image: string, index: number) => (
-                        <div key={image} className='relative'>
-                          <Image
-                            src={image}
-                            alt='product image'
-                            className='w-20 h-20 object-cover object-center rounded-sm border'
-                            width={100}
-                            height={100}
-                          />
-
-                          <button
-                            type='button'
-                            onClick={() => {
-                              const updatedImages = images.filter(
-                                (_, i) => i !== index
-                              )
-                              form.setValue('images', updatedImages)
-                            }}
-                            className='absolute -top-2 -right-2 bg-red-600 text-white rounded-full w-6 h-6 text-xs flex items-center justify-center'
-                          >
-                            ×
-                          </button>
-                        </div>
-                      ))}
-
-                      <FormControl>
-                        <UploadButton
-                          endpoint='imageUploader'
-                          onClientUploadComplete={(res: { url: string }[]) => {
-                            if (res && res.length > 0) {
-                              form.setValue('images', [
-                                ...images,
-                                res[0].url,
-                              ])
-                            }
-                          }}
-                          onUploadError={(error: Error) => {
-                            toast({
-                              variant: 'destructive',
-                              description: `ERROR! ${error.message}`,
-                            })
-                          }}
+                  <div className='flex flex-wrap justify-start items-center gap-4'>
+                    {images.map((image: string, index: number) => (
+                      <div key={image} className='relative'>
+                        <Image
+                          src={image}
+                          alt='product image'
+                          className='w-20 h-20 object-cover object-center rounded-sm border'
+                          width={100}
+                          height={100}
                         />
-                      </FormControl>
-                    </div>
-                  </CardContent>
-                </Card>
 
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
+                        <button
+                          type='button'
+                          onClick={() => {
+                            const updatedImages = images.filter(
+                              (_, i) => i !== index
+                            )
+                            form.setValue('images', updatedImages)
+                          }}
+                          className='absolute -top-2 -right-2 bg-red-600 text-white rounded-full w-6 h-6 text-xs flex items-center justify-center'
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
 
-        <div>
-          <FormField
-            control={form.control}
-            name='description'
-            render={({ field }) => (
-              <FormItem className='w-full'>
-                <FormLabel>Description</FormLabel>
-                <FormControl>
-                  <Textarea
-                    placeholder='Enter product description'
-                    className='resize-none'
-                    {...field}
-                  />
-                </FormControl>
-                <FormDescription>
-                  Add product features, specifications, and important details.
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
+                    <FormControl>
+                      <UploadButton
+                        endpoint='imageUploader'
+                        onClientUploadComplete={(res: { url: string }[]) => {
+                          if (res && res.length > 0) {
+                            form.setValue('images', [...images, res[0].url])
+                          }
+                        }}
+                        onUploadError={(error: Error) => {
+                          toast({
+                            variant: 'destructive',
+                            description: `ERROR! ${error.message}`,
+                          })
+                        }}
+                      />
+                    </FormControl>
+                  </div>
+                </CardContent>
+              </Card>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-        <div>
-          <FormField
-            control={form.control}
-            name='isPublished'
-            render={({ field }) => (
-              <FormItem className='space-x-2 items-center'>
-                <FormControl>
-                  <Checkbox
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
-                </FormControl>
-                <FormLabel>Is Published?</FormLabel>
-              </FormItem>
-            )}
-          />
-        </div>
+        <FormField
+          control={form.control}
+          name='tags'
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Product Tags</FormLabel>
+              <FormDescription>
+                Select where this product should appear on the homepage.
+              </FormDescription>
 
-        <div>
-          <Button
-            type='submit'
-            size='lg'
-            disabled={form.formState.isSubmitting}
-            className='button col-span-2 w-full'
-          >
-            {form.formState.isSubmitting
-              ? 'Submitting...'
-              : `${type} Product`}
-          </Button>
-        </div>
+              <div className='grid grid-cols-2 md:grid-cols-4 gap-3'>
+                {tagOptions.map((tag) => (
+                  <FormItem
+                    key={tag.value}
+                    className='flex items-center space-x-2 rounded-md border p-3'
+                  >
+                    <FormControl>
+                      <Checkbox
+                        checked={(field.value || []).includes(tag.value)}
+                        onCheckedChange={(checked) => {
+                          const currentTags = field.value || []
+
+                          if (checked) {
+                            field.onChange([...currentTags, tag.value])
+                          } else {
+                            field.onChange(
+                              currentTags.filter(
+                                (value: string) => value !== tag.value
+                              )
+                            )
+                          }
+                        }}
+                      />
+                    </FormControl>
+                    <FormLabel className='font-normal cursor-pointer'>
+                      {tag.label}
+                    </FormLabel>
+                  </FormItem>
+                ))}
+              </div>
+
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name='description'
+          render={({ field }) => (
+            <FormItem className='w-full'>
+              <FormLabel>Description</FormLabel>
+              <FormControl>
+                <Textarea
+                  placeholder='Enter product description'
+                  className='resize-none'
+                  {...field}
+                />
+              </FormControl>
+              <FormDescription>
+                Add product features, specifications, and important details.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name='isPublished'
+          render={({ field }) => (
+            <FormItem className='space-x-2 items-center'>
+              <FormControl>
+                <Checkbox
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+              </FormControl>
+              <FormLabel>Is Published?</FormLabel>
+            </FormItem>
+          )}
+        />
+
+        <Button
+          type='submit'
+          size='lg'
+          disabled={form.formState.isSubmitting}
+          className='button col-span-2 w-full'
+        >
+          {form.formState.isSubmitting ? 'Submitting...' : `${type} Product`}
+        </Button>
       </form>
     </Form>
   )
