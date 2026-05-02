@@ -265,7 +265,7 @@ const products: IProductInput[] = [
   {
     name: 'Nike Mens Slim-fit Long-Sleeve T-Shirt',
     slug: toSlug('Nike Mens Slim-fit Long-Sleeve T-Shirt'),
-    category: 'T-Shirts',
+    category: 'Cylindrical',
     images: ['/images/p11-1.jpg', '/images/p11-2.jpg'],
     tags: ['new-arrival'],
     isPublished: true,
@@ -293,7 +293,7 @@ const products: IProductInput[] = [
   {
     name: 'Jerzees Long-Sleeve Heavyweight Blend T-Shirt',
     slug: toSlug('Jerzees Long-Sleeve Heavyweight Blend T-Shirt'),
-    category: 'T-Shirts',
+    category: 'Cylindrical',
     images: [
       '/images/p12-1.jpg',
       '/images/p12-2.jpg',
@@ -327,7 +327,7 @@ const products: IProductInput[] = [
   {
     name: "Jerzees Men's Long-Sleeve T-Shirt",
     slug: toSlug('Jerzees Men Long-Sleeve T-Shirt'),
-    category: 'T-Shirts',
+    category: 'Cylindrical',
     brand: 'Jerzees',
     images: ['/images/p13-1.jpg', '/images/p13-2.jpg'],
     tags: ['best-seller'],
@@ -357,7 +357,7 @@ const products: IProductInput[] = [
     slug: toSlug(
       'Decrum Mens Plain Long Sleeve T-Shirt - Comfortable Soft Fashion V Neck Full Sleeves Jersey Shirts'
     ),
-    category: 'T-Shirts',
+    category: 'Cylindrical',
     brand: 'Jerzees',
     images: ['/images/p14-1.jpg', '/images/p14-2.jpg'],
     tags: ['todays-deal'],
@@ -387,7 +387,7 @@ const products: IProductInput[] = [
     slug: toSlug(
       "Muscle Cmdr Men's Slim Fit Henley Shirt Long&Short Business Sleeve Casual 3 Metal Buton Placket Casual Stylish T-Shirt"
     ),
-    category: 'T-Shirts',
+    category: 'Cylindrical',
     brand: ' Muscle Cmdr',
     images: ['/images/p15-1.jpg', '/images/p15-2.jpg'],
     tags: ['new-arrival', 'featured'],
@@ -415,7 +415,7 @@ const products: IProductInput[] = [
   {
     name: 'Hanes Mens Long Sleeve Beefy Henley Shirt',
     slug: toSlug('Hanes Mens Long Sleeve Beefy Henley Shirt'),
-    category: 'T-Shirts',
+    category: 'Cylindrical',
     brand: 'Jerzees',
     images: ['/images/p16-1.jpg', '/images/p16-2.jpg'],
     tags: ['best-seller', 'todays-deal'],
@@ -440,12 +440,12 @@ const products: IProductInput[] = [
 
     reviews: [],
   },
-  // Jeans
+  // Prismatic
   {
-    name: 'Silver Jeans Co. Mens Jace Slim Fit Bootcut Jeans',
-    slug: toSlug('Silver Jeans Co. Mens Jace Slim Fit Bootcut Jeans'),
-    category: 'Jeans',
-    brand: 'Silver Jeans Co',
+    name: 'Silver Prismatic Co. Mens Jace Slim Fit Bootcut Prismatic',
+    slug: toSlug('Silver Prismatic Co. Mens Jace Slim Fit Bootcut Prismatic'),
+    category: 'Prismatic',
+    brand: 'Silver Prismatic Co',
     images: ['/images/p21-1.jpg', '/images/p21-2.jpg'],
     tags: ['new-arrival'],
     isPublished: true,
@@ -463,18 +463,18 @@ const products: IProductInput[] = [
     countInStock: 54,
     numSales: 21,
     description:
-      'Silver Jeans Co. Jace Slim Fit Bootcut Jeans - Consider Jace a modern cowboy jean. It sits below the waist and features a slim fit through the hip and thigh. Finished with an 18” bootcut leg opening that complements the slimmer silhouette while still fitting over boots',
+      'Silver Prismatic Co. Jace Slim Fit Bootcut Prismatic - Consider Jace a modern cowboy jean. It sits below the waist and features a slim fit through the hip and thigh. Finished with an 18” bootcut leg opening that complements the slimmer silhouette while still fitting over boots',
     sizes: ['30Wx30L', '34Wx30L', '36Wx30L'],
     colors: ['Blue', 'Grey'],
 
     reviews: [],
   },
   {
-    name: "Levi's mens 505 Regular Fit Jeans (Also Available in Big & Tall)",
+    name: "Levi's mens 505 Regular Fit Prismatic (Also Available in Big & Tall)",
     slug: toSlug(
-      "Levi's mens 505 Regular Fit Jeans (Also Available in Big & Tall)"
+      "Levi's mens 505 Regular Fit Prismatic (Also Available in Big & Tall)"
     ),
-    category: 'Jeans',
+    category: 'Prismatic',
     brand: "Levi's",
     images: ['/images/p22-1.jpg', '/images/p22-2.jpg'],
     tags: ['featured'],
@@ -502,7 +502,7 @@ const products: IProductInput[] = [
   {
     name: 'Essentials Mens Straight-Fit Stretch Jean',
     slug: toSlug('Essentials Mens Straight-Fit Stretch Jean'),
-    category: 'Jeans',
+    category: 'Prismatic',
     brand: 'Essentials',
     images: ['/images/p23-1.jpg', '/images/p23-2.jpg'],
     tags: ['best-seller'],
@@ -521,18 +521,18 @@ const products: IProductInput[] = [
     countInStock: 23,
     numSales: 54,
     description:
-      'These classic 5-pocket straight-fit jeans are crafted with a bit of stretch for additional comfort and to help maintain their shape',
+      'These classic 5-pocket straight-fit Prismatic are crafted with a bit of stretch for additional comfort and to help maintain their shape',
     sizes: ['30Wx30L', '34Wx30L', '36Wx30L'],
     colors: ['Grey', 'Blue'],
 
     reviews: [],
   },
   {
-    name: "Buffalo David Bitton Mens Men's Driven Relaxed Denim JeansJeans",
+    name: "Buffalo David Bitton Mens Men's Driven Relaxed Denim PrismaticPrismatic",
     slug: toSlug(
-      "Buffalo David Bitton Mens Men's Driven Relaxed Denim JeansJeans"
+      "Buffalo David Bitton Mens Men's Driven Relaxed Denim PrismaticPrismatic"
     ),
-    category: 'Jeans',
+    category: 'Prismatic',
     brand: 'Buffalo David Bitton',
     images: ['/images/p24-1.jpg', '/images/p24-2.jpg'],
     tags: ['todays-deal'],
@@ -551,7 +551,7 @@ const products: IProductInput[] = [
     countInStock: 24,
     numSales: 53,
     description:
-      'Stretch recycled denim jeans in an authentic and sanded wash blue. Features a comfortable low-rise waist with a relaxed fit at the leg. The distressed look gives these jeans an effortlessly worn-in feel. The eco-friendly logo patch in tan and red is at the back waistband. The signature maple leaf graphic is debossed at the zip-fly.',
+      'Stretch recycled denim Prismatic in an authentic and sanded wash blue. Features a comfortable low-rise waist with a relaxed fit at the leg. The distressed look gives these Prismatic an effortlessly worn-in feel. The eco-friendly logo patch in tan and red is at the back waistband. The signature maple leaf graphic is debossed at the zip-fly.',
     sizes: ['30Wx30L', '34Wx30L', '36Wx30L'],
     colors: ['Blue', 'Grey'],
 
@@ -560,7 +560,7 @@ const products: IProductInput[] = [
   {
     name: 'Dickies Mens Relaxed Fit Carpenter Jean',
     slug: toSlug('Dickies Mens Relaxed Fit Carpenter Jean'),
-    category: 'Jeans',
+    category: 'Prismatic',
     brand: 'Dickies',
     images: ['/images/p25-1.jpg', '/images/p25-2.jpg'],
     tags: ['new-arrival', 'featured'],
@@ -588,7 +588,7 @@ const products: IProductInput[] = [
   {
     name: 'Wrangler mens Premium Performance Cowboy Cut Slim Fit Jean',
     slug: toSlug('Wrangler mens Premium Performance Cowboy Cut Slim Fit Jean'),
-    category: 'Jeans',
+    category: 'Prismatic',
     brand: 'Wrangler',
     images: ['/images/p26-1.jpg', '/images/p26-2.jpg'],
     tags: ['best-seller', 'todays-deal'],
@@ -607,7 +607,7 @@ const products: IProductInput[] = [
     countInStock: 26,
     numSales: 48,
     description:
-      'Designed with a functional fit in mind, these jeans are made to stack over your favorite pair of boots. Constructed with a slim fit in the waist, seat, and thigh, this jean is made for both function and comfort for long days in the saddle.',
+      'Designed with a functional fit in mind, these Prismatic are made to stack over your favorite pair of boots. Constructed with a slim fit in the waist, seat, and thigh, this jean is made for both function and comfort for long days in the saddle.',
     sizes: ['30Wx30L', '34Wx30L', '36Wx30L'],
     colors: ['Blue', 'Grey'],
 
@@ -617,7 +617,7 @@ const products: IProductInput[] = [
   {
     name: "Seiko Men's Analogue Watch with Black Dial",
     slug: toSlug("Seiko Men's Analogue Watch with Black Dial"),
-    category: 'Wrist Watches',
+    category: 'Battery Capacitor',
     brand: 'Seiko',
     images: ['/images/p31-1.jpg', '/images/p31-2.jpg'],
     tags: ['new-arrival'],
@@ -647,7 +647,7 @@ const products: IProductInput[] = [
     slug: toSlug(
       'SEIKO 5 Sport SRPJ83 Beige Dial Nylon Automatic Watch, Beige, Automatic Watch'
     ),
-    category: 'Wrist Watches',
+    category: 'Battery Capacitor',
     brand: 'Seiko',
     images: ['/images/p32-1.jpg', '/images/p32-2.jpg'],
     tags: ['featured'],
@@ -677,7 +677,7 @@ const products: IProductInput[] = [
     slug: toSlug(
       "Casio Men's Heavy Duty Analog Quartz Stainless Steel Strap, Silver, 42 Casual Watch"
     ),
-    category: 'Wrist Watches',
+    category: 'Battery Capacitor',
     brand: 'Casio',
     images: ['/images/p33-1.jpg', '/images/p33-2.jpg'],
     tags: ['best-seller'],
@@ -707,7 +707,7 @@ const products: IProductInput[] = [
     slug: toSlug(
       'Casio Classic Silver-Tone Stainless Steel Band Date Indicator Watch'
     ),
-    category: 'Wrist Watches',
+    category: 'Battery Capacitor',
     brand: 'Casio',
     images: ['/images/p34-1.jpg', '/images/p34-2.jpg'],
     tags: ['todays-deal'],
@@ -735,7 +735,7 @@ const products: IProductInput[] = [
   {
     name: "Fossil Men's Grant Stainless Steel Quartz Chronograph Watch",
     slug: toSlug("Fossil Men's Grant Stainless Steel Quartz Chronograph Watch"),
-    category: 'Wrist Watches',
+    category: 'Battery Capacitor',
     brand: 'Fossil',
     images: ['/images/p35-1.jpg', '/images/p35-2.jpg'],
     tags: ['new-arrival', 'featured'],
@@ -763,7 +763,7 @@ const products: IProductInput[] = [
   {
     name: "Fossil Men's Machine Stainless Steel Quartz Watch",
     slug: toSlug("Fossil Men's Machine Stainless Steel Quartz Watch"),
-    category: 'Wrist Watches',
+    category: 'Battery Capacitor',
     brand: 'Fossil',
     images: ['/images/p36-1.jpg', '/images/p36-2.jpg'],
     tags: ['best-seller', 'todays-deal'],
@@ -790,9 +790,9 @@ const products: IProductInput[] = [
   },
   // Sneakers
   {
-    name: 'adidas Mens Grand Court 2.0 Training Shoes Training Shoes',
-    slug: toSlug('adidas Mens Grand Court 2.0 Training Shoes Training Shoes'),
-    category: 'Shoes',
+    name: 'adidas Mens Grand Court 2.0 Training Module & Battery Packs Training Module & Battery Packs',
+    slug: toSlug('adidas Mens Grand Court 2.0 Training Module & Battery Packs Training Module & Battery Packs'),
+    category: 'Module & Battery Packs',
     brand: 'adidas',
     images: ['/images/p41-1.jpg', '/images/p41-2.jpg'],
     tags: ['new-arrival'],
@@ -818,11 +818,11 @@ const products: IProductInput[] = [
     reviews: [],
   },
   {
-    name: "ziitop Men's Running Walking Shoes Fashion Sneakers Mesh Dress Shoes Business Oxfords Shoes Lightweight Casual Breathable Work Formal Shoes",
+    name: "ziitop Men's Running Walking Module & Battery Packs Fashion Sneakers Mesh Dress Module & Battery Packs Business Oxfords Module & Battery Packs Lightweight Casual Breathable Work Formal Module & Battery Packs",
     slug: toSlug(
-      "ziitop Men's Running Walking Shoes Fashion Sneakers Mesh Dress Shoes Business Oxfords Shoes Lightweight Casual Breathable Work Formal Shoes"
+      "ziitop Men's Running Walking Module & Battery Packs Fashion Sneakers Mesh Dress Module & Battery Packs Business Oxfords Module & Battery Packs Lightweight Casual Breathable Work Formal Module & Battery Packs"
     ),
-    category: 'Shoes',
+    category: 'Module & Battery Packs',
     brand: 'ziitop',
     images: ['/images/p42-1.jpg', '/images/p42-2.jpg'],
     tags: ['featured'],
@@ -848,11 +848,11 @@ const products: IProductInput[] = [
     reviews: [],
   },
   {
-    name: 'Skechers mens Summits High Range Hands Free Slip-in Shoes Work shoe',
+    name: 'Skechers mens Summits High Range Hands Free Slip-in Module & Battery Packs Work shoe',
     slug: toSlug(
-      'Skechers mens Summits High Range Hands Free Slip-in Shoes Work shoe'
+      'Skechers mens Summits High Range Hands Free Slip-in Module & Battery Packs Work shoe'
     ),
-    category: 'Shoes',
+    category: 'Module & Battery Packs',
     brand: 'Skechers',
     images: ['/images/p43-1.jpg', '/images/p43-2.jpg'],
     tags: ['best-seller'],
@@ -878,11 +878,11 @@ const products: IProductInput[] = [
     reviews: [],
   },
   {
-    name: 'DLWKIPV Mens Running Shoes Tennis Cross Training Sneakers Fashion Non Slip Outdoor Walking Jogging Shoes Mesh Light Flexible Comfortable Breathable Shoes',
+    name: 'DLWKIPV Mens Running Module & Battery Packs Tennis Cross Training Sneakers Fashion Non Slip Outdoor Walking Jogging Module & Battery Packs Mesh Light Flexible Comfortable Breathable Module & Battery Packs',
     slug: toSlug(
-      'DLWKIPV Mens Running Shoes Tennis Cross Training Sneakers Fashion Non Slip Outdoor Walking Jogging Shoes Mesh Light Flexible Comfortable Breathable Shoes'
+      'DLWKIPV Mens Running Module & Battery Packs Tennis Cross Training Sneakers Fashion Non Slip Outdoor Walking Jogging Module & Battery Packs Mesh Light Flexible Comfortable Breathable Module & Battery Packs'
     ),
-    category: 'Shoes',
+    category: 'Module & Battery Packs',
     brand: 'DLWKIPV',
     images: ['/images/p44-1.jpg', '/images/p44-2.jpg'],
     tags: ['todays-deal'],
@@ -908,9 +908,9 @@ const products: IProductInput[] = [
     reviews: [],
   },
   {
-    name: "ASICS Men's GT-2000 13 Running Shoes",
-    slug: toSlug("ASICS Men's GT-2000 13 Running Shoes"),
-    category: 'Shoes',
+    name: "ASICS Men's GT-2000 13 Running Module & Battery Packs",
+    slug: toSlug("ASICS Men's GT-2000 13 Running Module & Battery Packs"),
+    category: 'Module & Battery Packs',
     brand: 'ASICS',
     images: ['/images/p45-1.jpg', '/images/p45-2.jpg'],
     tags: ['new-arrival', 'featured'],
@@ -936,11 +936,11 @@ const products: IProductInput[] = [
     reviews: [],
   },
   {
-    name: "Mens Wearbreeze Shoes, Urban - Ultra Comfortable Shoes, Breeze Shoes for Men, Men's Mesh Dress Sneakers Business Shoes",
+    name: "Mens Wearbreeze Module & Battery Packs, Urban - Ultra Comfortable Module & Battery Packs, Breeze Module & Battery Packs for Men, Men's Mesh Dress Sneakers Business Module & Battery Packs",
     slug: toSlug(
-      "Mens Wearbreeze Shoes, Urban - Ultra Comfortable Shoes, Breeze Shoes for Men, Men's Mesh Dress Sneakers Business Shoes"
+      "Mens Wearbreeze Module & Battery Packs, Urban - Ultra Comfortable Module & Battery Packs, Breeze Module & Battery Packs for Men, Men's Mesh Dress Sneakers Business Module & Battery Packs"
     ),
-    category: 'Shoes',
+    category: 'Module & Battery Packs',
     brand: 'Generic',
     images: ['/images/p46-1.jpg', '/images/p46-2.jpg'],
     tags: ['best-seller', 'todays-deal'],
@@ -1185,10 +1185,7 @@ We also provide helpful resources such as order tracking, product guides, and FA
     },
   ],
   headerMenus: [
-    {
-      name: "Today's Deal",
-      href: '/search?tag=todays-deal',
-    },
+
     {
       name: 'New Arrivals',
       href: '/search?tag=new-arrival',
@@ -1198,46 +1195,51 @@ We also provide helpful resources such as order tracking, product guides, and FA
       href: '/search?tag=featured',
     },
     {
-      name: 'Best Sellers',
+      name: 'Best Brands',
       href: '/search?tag=best-seller',
     },
     {
-      name: 'Browsing History',
+      name: 'Voltro Products',
       href: '/#browsing-history',
     },
     {
-      name: 'Customer Service',
+      name: 'Case Studies',
+      href: '/#browsing-history',
+    },
+    
+    {
+      name: 'Support',
+      href: '/page/help',
+    },
+     {
+      name: 'Contact',
       href: '/page/customer-service',
     },
     {
-      name: 'About Us',
+      name: 'Company Introduction',
       href: '/page/about-us',
-    },
-    {
-      name: 'Help',
-      href: '/page/help',
     },
   ],
   carousels: [
     {
-      title: 'Most Popular Shoes For Sale',
+      title: 'Most Popular Battery For Sale',
       buttonCaption: 'Shop Now',
-      image: '/images/banner3.jpg',
-      url: '/search?category=Shoes',
+      image: '/images/banner3.png',
+      url: '/search?category=Module & Battery Packs',
       isPublished: true,
     },
     {
-      title: 'Best Sellers in T-Shirts',
+      title: 'Best Sellers in BMS',
       buttonCaption: 'Shop Now',
-      image: '/images/banner1.jpg',
-      url: '/search?category=T-Shirts',
+      image: '/images/banner1.png',
+      url: '/search?category=Cylindrical',
       isPublished: true,
     },
     {
-      title: 'Best Deals on Wrist Watches',
+      title: 'Best Deals on Chargers',
       buttonCaption: 'See More',
-      image: '/images/banner2.jpg',
-      url: '/search?category=Wrist Watches',
+      image: '/images/banner2.png',
+      url: '/search?category=Battery Capacitor',
       isPublished: true,
     },
   ],
@@ -1251,37 +1253,37 @@ We also provide helpful resources such as order tracking, product guides, and FA
         pageSize: 9,
       },
       site: {
-        name: 'NxtAmzn',
+        name: 'Voltro',
         description:
-          'NxtAmzn is a sample Ecommerce website built with Next.js, Tailwind CSS, and MongoDB.',
+          'Voltro is a sample Ecommerce website built with Next.js, Tailwind CSS, and MongoDB.',
         keywords: 'Next Ecommerce, Next.js, Tailwind CSS, MongoDB',
         url: 'https://next-mongo-ecommerce-final.vercel.app',
         logo: '/icons/logo.svg',
-        slogan: 'Spend less, enjoy more.',
+        slogan: 'Powering the Future.',
         author: 'Next Ecommerce',
-        copyright: '2000-2024, Next-Ecommerce.com, Inc. or its affiliates',
+        copyright: '2025-2026, Next-Ecommerce.com, Inc. or its affiliates',
         email: 'admin@example.com',
-        address: '123, Main Street, Anytown, CA, Zip 12345',
-        phone: '+1 (123) 456-7890',
+        address: 'Korea, Zip 12345',
+        phone: '+82 (042) 456-7890',
       },
       carousels: [
         {
-          title: 'Most Popular Shoes For Sale',
+          title: 'Most Popular Module & Battery Packs For Sale',
           buttonCaption: 'Shop Now',
           image: '/images/banner3.jpg',
-          url: '/search?category=Shoes',
+          url: '/search?category=Module & Battery Packs',
         },
         {
-          title: 'Best Sellers in T-Shirts',
+          title: 'Best Sellers in Cylindrical',
           buttonCaption: 'Shop Now',
           image: '/images/banner1.jpg',
-          url: '/search?category=T-Shirts',
+          url: '/search?category=Cylindrical',
         },
         {
-          title: 'Best Deals on Wrist Watches',
+          title: 'Best Deals on Battery Capacitor',
           buttonCaption: 'See More',
           image: '/images/banner2.jpg',
-          url: '/search?category=Wrist Watches',
+          url: '/search?category=Battery Capacitor',
         },
       ],
       availableLanguages: i18n.locales.map((locale) => ({
