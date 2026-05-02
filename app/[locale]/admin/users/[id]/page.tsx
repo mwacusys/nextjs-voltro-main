@@ -26,9 +26,7 @@ export default async function UserEditPage(props: {
       <div className='flex mb-4'>
         <Link href='/admin/users'>Users</Link>
         <span className='mx-1'>›</span>
-        <Link href={`/admin/users/${user._id.toString()}`}>
-          {user._id.toString()}
-        </Link>
+        <Link href={`/admin/users/${user._id}`}>{user._id}</Link>
       </div>
 
       <div className='my-8'>

@@ -16,57 +16,11 @@ import {
 } from '@react-email/components'
 
 import { formatCurrency } from '@/lib/utils'
+import { IOrder } from '@/lib/db/models/order.model'
 import { getSetting } from '@/lib/actions/setting.actions'
 
-type OrderItem = {
-  clientId: string
-  name: string
-  image: string
-  price: number
-  quantity: number
-  product: string
-  slug: string
-  category: string
-  countInStock: number
-}
-
-type OrderEmailType = {
-  _id: string
-  createdAt?: Date
-  updatedAt?: Date
-
-  isPaid?: boolean
-  paidAt?: Date
-
-  totalPrice: number
-  itemsPrice: number
-  taxPrice: number
-  shippingPrice: number
-
-  paymentMethod?: string
-  expectedDeliveryDate?: Date
-  isDelivered?: boolean
-
-  user?: {
-    name: string
-    email: string
-  }
-
-  shippingAddress?: {
-    fullName: string
-    street: string
-    city: string
-    postalCode: string
-    country: string
-    phone: string
-    province: string
-  }
-
-  items: OrderItem[]
-}
-
 type OrderInformationProps = {
-  order: OrderEmailType
+  order: IOrder
 }
 
 AskReviewOrderItemsEmail.PreviewProps = {
@@ -74,19 +28,14 @@ AskReviewOrderItemsEmail.PreviewProps = {
     _id: '123',
     isPaid: true,
     paidAt: new Date(),
-    createdAt: new Date(), // ✅ ADD THIS
-    updatedAt: new Date(), // ✅ optional but recommended
-
     totalPrice: 100,
     itemsPrice: 100,
     taxPrice: 0,
     shippingPrice: 0,
-
     user: {
       name: 'John Doe',
       email: 'john.doe@example.com',
     },
-
     shippingAddress: {
       fullName: 'John Doe',
       street: '123 Main St',
@@ -96,7 +45,6 @@ AskReviewOrderItemsEmail.PreviewProps = {
       phone: '123-456-7890',
       province: 'New York',
     },
-
     items: [
       {
         clientId: '123',
@@ -110,11 +58,10 @@ AskReviewOrderItemsEmail.PreviewProps = {
         countInStock: 10,
       },
     ],
-
     paymentMethod: 'PayPal',
     expectedDeliveryDate: new Date(),
     isDelivered: true,
-  },
+  } as IOrder,
 } satisfies OrderInformationProps
 const dateFormatter = new Intl.DateTimeFormat('en', { dateStyle: 'medium' })
 
@@ -143,9 +90,7 @@ export default async function AskReviewOrderItemsEmail({
                     Purchased On
                   </Text>
                   <Text className='mt-0 mr-4'>
-                    {order.createdAt
-                      ? dateFormatter.format(order.createdAt)
-                      : 'N/A'}
+                    {dateFormatter.format(order.createdAt)}
                   </Text>
                 </Column>
                 <Column>
@@ -159,8 +104,8 @@ export default async function AskReviewOrderItemsEmail({
               </Row>
             </Section>
             <Section className='border border-solid border-gray-500 rounded-lg p-4 md:p-6 my-4'>
-              {order.items.map((item: OrderItem) => (
-                <Row key={item.clientId} className='mt-8'>
+              {order.items.map((item) => (
+                <Row key={item.product} className='mt-8'>
                   <Column className='w-20'>
                     <Link href={`${site.url}/product/${item.slug}`}>
                       <Img

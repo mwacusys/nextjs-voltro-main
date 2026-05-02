@@ -1,115 +1,98 @@
-import { Document, Schema, model, models, Types } from 'mongoose'
+import { Document, Model, model, models, Schema } from 'mongoose'
+import { IProductInput } from '@/types'
 
-export interface IProduct extends Document {
-  _id: Types.ObjectId
-
-  name: string
-  slug: string
-
-  category: Types.ObjectId
-  subcategory?: Types.ObjectId
-  subSubcategory?: Types.ObjectId
-
-  images: string[]
-  brand?: string
-
-  price: number
-  listPrice?: number
-
-  countInStock: number
-  description?: string
-
-  avgRating: number
-  numReviews: number
-
-  ratingDistribution: {
-    rating: number
-    count: number
-  }[]
-
-  numSales: number
-
-  sizes: string[]
-  colors: string[]
-
-  tags: string[]
-
-  isPublished: boolean
-
+export interface IProduct extends Document, IProductInput {
+  _id: string
   createdAt: Date
   updatedAt: Date
 }
 
 const productSchema = new Schema<IProduct>(
   {
-    name: { type: String, required: true },
-    slug: { type: String, required: true, unique: true },
-
-    /* ================= CATEGORY ================= */
-
-    category: {
-      type: Schema.Types.ObjectId,
-      ref: 'Category',
+    name: {
+      type: String,
       required: true,
-      index: true, // ✅ important
     },
-
-    subcategory: {
-      type: Schema.Types.ObjectId,
-      ref: 'Category',
-      default: null,
+    slug: {
+      type: String,
+      required: true,
+      unique: true,
     },
-
-    subSubcategory: {
-      type: Schema.Types.ObjectId,
-      ref: 'Category',
-      default: null,
+    category: {
+      type: String,
+      required: true,
     },
-
-    /* ================= BASIC ================= */
-
-    images: { type: [String], default: [] },
-    brand: { type: String, default: '' },
-
-    price: { type: Number, required: true },
-    listPrice: { type: Number, default: 0 },
-
-    countInStock: { type: Number, default: 0 },
-    description: { type: String, default: '' },
-
-    /* ================= REVIEWS ================= */
-
-    avgRating: { type: Number, default: 0 },
-    numReviews: { type: Number, default: 0 },
-
+    images: [String],
+    brand: {
+      type: String,
+      required: true,
+    },
+    description: {
+      type: String,
+      trim: true,
+    },
+    price: {
+      type: Number,
+      required: true,
+    },
+    listPrice: {
+      type: Number,
+      required: true,
+    },
+    countInStock: {
+      type: Number,
+      required: true,
+    },
+    tags: { type: [String], default: ['new arrival'] },
+    colors: { type: [String], default: ['White', 'Red', 'Black'] },
+    sizes: { type: [String], default: ['S', 'M', 'L'] },
+    avgRating: {
+      type: Number,
+      required: true,
+      default: 0,
+    },
+    numReviews: {
+      type: Number,
+      required: true,
+      default: 0,
+    },
     ratingDistribution: [
       {
-        rating: { type: Number },
-        count: { type: Number },
+        rating: {
+          type: Number,
+          required: true,
+        },
+        count: {
+          type: Number,
+          required: true,
+        },
       },
     ],
-
-    numSales: { type: Number, default: 0 },
-
-    /* ================= VARIANTS ================= */
-
-    sizes: { type: [String], default: [] },
-    colors: { type: [String], default: [] },
-
-    tags: { type: [String], default: [] },
-
-    isPublished: { type: Boolean, default: true },
+    numSales: {
+      type: Number,
+      required: true,
+      default: 0,
+    },
+    isPublished: {
+      type: Boolean,
+      required: true,
+      default: false,
+    },
+    reviews: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: 'Review',
+        default: [],
+      },
+    ],
   },
-  { timestamps: true },
+  {
+    timestamps: true,
+  }
 )
 
-/* ================= INDEXES ================= */
-
-// Faster filtering
-productSchema.index({ category: 1 })
-productSchema.index({ subcategory: 1 })
-productSchema.index({ subSubcategory: 1 })
-
-const Product = models.Product || model<IProduct>('Product', productSchema)
+const Product =
+  (models.Product as Model<IProduct>) ||
+  model<IProduct>('Product', productSchema)
 
 export default Product

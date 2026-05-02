@@ -22,17 +22,11 @@ const UpdateWebPage = async (props: UpdateWebPageProps) => {
       <div className='flex mb-4'>
         <Link href='/admin/web-pages'>Web Pages</Link>
         <span className='mx-1'>›</span>
-        <Link href={`/admin/web-pages/${webPage._id.toString()}`}>
-          {webPage._id.toString()}
-        </Link>
+        <Link href={`/admin/web-pages/${webPage._id}`}>{webPage._id}</Link>
       </div>
 
       <div className='my-8'>
-        <WebPageForm
-          type='Update'
-          webPage={webPage}
-          webPageId={webPage._id.toString()}
-        />
+        <WebPageForm type='Update' webPage={webPage} webPageId={webPage._id} />
       </div>
     </main>
   )

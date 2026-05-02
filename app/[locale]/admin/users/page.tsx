@@ -48,18 +48,16 @@ export default async function AdminUser(props: {
           </TableHeader>
           <TableBody>
             {users?.data.map((user: IUser) => (
-              <TableRow key={user._id.toString()}>
-                <TableCell>{formatId(user._id.toString())}</TableCell>
+              <TableRow key={user._id}>
+                <TableCell>{formatId(user._id)}</TableCell>
                 <TableCell>{user.name}</TableCell>
                 <TableCell>{user.email}</TableCell>
                 <TableCell>{user.role}</TableCell>
                 <TableCell className='flex gap-1'>
                   <Button asChild variant='outline' size='sm'>
-                    <Link href={`/admin/users/${user._id.toString()}`}>
-                      Edit
-                    </Link>
+                    <Link href={`/admin/users/${user._id}`}>Edit</Link>
                   </Button>
-                  <DeleteDialog id={user._id.toString()} action={deleteUser} />
+                  <DeleteDialog id={user._id} action={deleteUser} />
                 </TableCell>
               </TableRow>
             ))}

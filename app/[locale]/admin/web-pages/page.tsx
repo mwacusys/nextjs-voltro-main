@@ -42,21 +42,16 @@ export default async function WebPageAdminPage() {
           </TableHeader>
           <TableBody>
             {webPages.map((webPage: IWebPage) => (
-              <TableRow key={webPage._id.toString()}>
-                <TableCell>{formatId(webPage._id.toString())}</TableCell>
+              <TableRow key={webPage._id}>
+                <TableCell>{formatId(webPage._id)}</TableCell>
                 <TableCell>{webPage.title}</TableCell>
                 <TableCell>{webPage.slug}</TableCell>
                 <TableCell>{webPage.isPublished ? 'Yes' : 'No'}</TableCell>
                 <TableCell className='flex gap-1'>
                   <Button asChild variant='outline' size='sm'>
-                    <Link href={`/admin/web-pages/${webPage._id.toString()}`}>
-                      Edit
-                    </Link>
+                    <Link href={`/admin/web-pages/${webPage._id}`}>Edit</Link>
                   </Button>
-                  <DeleteDialog
-                    id={webPage._id.toString()}
-                    action={deleteWebPage}
-                  />
+                  <DeleteDialog id={webPage._id} action={deleteWebPage} />
                 </TableCell>
               </TableRow>
             ))}

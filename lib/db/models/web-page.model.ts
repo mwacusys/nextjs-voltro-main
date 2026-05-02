@@ -1,16 +1,11 @@
 import { IWebPageInput } from '@/types'
 import { Document, Model, model, models, Schema } from 'mongoose'
-import { Types } from 'mongoose'
 
 export interface IWebPage extends Document, IWebPageInput {
+  _id: string
   createdAt: Date
   updatedAt: Date
 }
-export type WebPageClient = {
-  _id: Types.ObjectId
-  createdAt: string
-  updatedAt: string
-} & IWebPageInput
 
 const webPageSchema = new Schema<IWebPage>(
   {
@@ -35,7 +30,7 @@ const webPageSchema = new Schema<IWebPage>(
   },
   {
     timestamps: true,
-  },
+  }
 )
 
 const WebPage =

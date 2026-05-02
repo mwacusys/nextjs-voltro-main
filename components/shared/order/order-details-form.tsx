@@ -168,13 +168,13 @@ export default function OrderDetailsForm({
             {isAdmin && !isPaid && paymentMethod === 'Cash On Delivery' && (
               <ActionButton
                 caption='Mark as paid'
-                action={() => updateOrderToPaid(order._id.toString())}
+                action={() => updateOrderToPaid(order._id)}
               />
             )}
             {isAdmin && isPaid && !isDelivered && (
               <ActionButton
                 caption='Mark as delivered'
-                action={() => deliverOrder(order._id.toString())}
+                action={() => deliverOrder(order._id)}
               />
             )}
           </CardContent>

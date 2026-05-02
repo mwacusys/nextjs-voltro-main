@@ -1,9 +1,8 @@
 import { IOrderInput } from '@/types'
 import { Document, Model, model, models, Schema } from 'mongoose'
-import { Types } from 'mongoose'
 
 export interface IOrder extends Document, IOrderInput {
-  _id: Types.ObjectId
+  _id: string
   createdAt: Date
   updatedAt: Date
 }
@@ -11,7 +10,7 @@ export interface IOrder extends Document, IOrderInput {
 const orderSchema = new Schema<IOrder>(
   {
     user: {
-      type: Schema.Types.ObjectId,
+      type: Schema.Types.ObjectId as unknown as typeof String,
       ref: 'User',
       required: true,
     },
@@ -58,7 +57,7 @@ const orderSchema = new Schema<IOrder>(
   },
   {
     timestamps: true,
-  },
+  }
 )
 
 const Order =
