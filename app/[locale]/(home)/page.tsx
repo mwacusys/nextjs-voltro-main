@@ -11,43 +11,78 @@ import {
 } from '@/lib/actions/product.actions'
 import { getSetting } from '@/lib/actions/setting.actions'
 import { toSlug } from '@/lib/utils'
-import { getTranslations } from 'next-intl/server'
+import { getTranslations, getLocale } from 'next-intl/server'
 
 export default async function HomePage() {
   const t = await getTranslations('Home')
+  const locale = await getLocale()
+
   const { carousels } = await getSetting()
+
   const todaysDeals = await getProductsByTag({ tag: 'todays-deal' })
   const bestSellingProducts = await getProductsByTag({ tag: 'best-seller' })
 
   const categories = (await getAllCategories()).slice(0, 4)
+
   const newArrivals = await getProductsForCard({
     tag: 'new-arrival',
   })
+
   const featureds = await getProductsForCard({
     tag: 'featured',
   })
+
   const bestSellers = await getProductsForCard({
     tag: 'best-seller',
   })
+
+ const allProducts = await getProductsByTag({
+  tag: 'featured',
+})
+
+const categoryItems = categories.map((category) => {
+  const productsInCategory = allProducts.filter(
+    (product) => product.category === category
+  )
+
+  const randomProduct =
+    productsInCategory.length > 0
+      ? productsInCategory[
+          Math.floor(Math.random() * productsInCategory.length)
+        ]
+      : null
+
+  // 🔥 Better random image logic
+  let image = `/images/${toSlug(category)}.jpg`
+
+  if (randomProduct?.images?.length) {
+    const randomIndex = Math.floor(
+      Math.random() * randomProduct.images.length
+    )
+    image = randomProduct.images[randomIndex]
+  }
+
+  return {
+    name: category,
+    image,
+    href: `/${locale}/search?category=${encodeURIComponent(category)}`,
+  }
+})
   const cards = [
     {
       title: t('Categories to explore'),
       link: {
         text: t('See More'),
-        href: '/search',
+        href: `/${locale}/search`,
       },
-      items: categories.map((category) => ({
-        name: category,
-        image: `/images/${toSlug(category)}.jpg`,
-        href: `/search?category=${category}`,
-      })),
+      items: categoryItems,
     },
     {
       title: t('Explore New Arrivals'),
       items: newArrivals,
       link: {
         text: t('View All'),
-        href: '/search?tag=new-arrival',
+        href: `/${locale}/search?tag=new-arrival`,
       },
     },
     {
@@ -55,7 +90,7 @@ export default async function HomePage() {
       items: bestSellers,
       link: {
         text: t('View All'),
-        href: '/search?tag=new-arrival',
+        href: `/${locale}/search?tag=best-seller`,
       },
     },
     {
@@ -63,7 +98,7 @@ export default async function HomePage() {
       items: featureds,
       link: {
         text: t('Shop Now'),
-        href: '/search?tag=new-arrival',
+        href: `/${locale}/search?tag=featured`,
       },
     },
   ]
@@ -71,13 +106,16 @@ export default async function HomePage() {
   return (
     <>
       <HomeCarousel items={carousels} />
+
       <div className='md:p-4 md:space-y-4 bg-border'>
         <HomeCard cards={cards} />
+
         <Card className='w-full rounded-none'>
           <CardContent className='p-4 items-center gap-3'>
             <ProductSlider title={t("Today's Deals")} products={todaysDeals} />
           </CardContent>
         </Card>
+
         <Card className='w-full rounded-none'>
           <CardContent className='p-4 items-center gap-3'>
             <ProductSlider

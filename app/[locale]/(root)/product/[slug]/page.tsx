@@ -17,16 +17,20 @@ import BrowsingHistoryList from '@/components/shared/browsing-history-list'
 import RatingSummary from '@/components/shared/product/rating-summary'
 import ProductSlider from '@/components/shared/product/product-slider'
 import { getTranslations } from 'next-intl/server'
+import { notFound } from 'next/navigation'
 
 export async function generateMetadata(props: {
-  params: Promise<{ slug: string }>
+  params: Promise<{ locale: string; slug: string }>
 }) {
   const t = await getTranslations()
-  const params = await props.params
-  const product = await getProductBySlug(params.slug)
+  const { slug } = await props.params
+
+  const product = await getProductBySlug(slug)
+
   if (!product) {
     return { title: t('Product.Product not found') }
   }
+
   return {
     title: product.name,
     description: product.description,
@@ -34,20 +38,18 @@ export async function generateMetadata(props: {
 }
 
 export default async function ProductDetails(props: {
-  params: Promise<{ slug: string }>
-  searchParams: Promise<{ page: string; color: string; size: string }>
+  params: Promise<{ locale: string; slug: string }>
+  searchParams: Promise<{ page?: string; color?: string; size?: string }>
 }) {
-  const searchParams = await props.searchParams
-
-  const { page, color, size } = searchParams
-
-  const params = await props.params
-
-  const { slug } = params
+  const { slug } = await props.params
+  const { page, color, size } = await props.searchParams
 
   const session = await auth()
-
   const product = await getProductBySlug(slug)
+
+  if (!product) {
+    notFound()
+  }
 
   const relatedProducts = await getRelatedProductsByCategory({
     category: product.category,
@@ -56,20 +58,23 @@ export default async function ProductDetails(props: {
   })
 
   const t = await getTranslations()
+
   return (
     <div>
       <AddToBrowsingHistory id={product._id} category={product.category} />
+
       <section>
-        <div className='grid grid-cols-1 md:grid-cols-5  '>
+        <div className='grid grid-cols-1 md:grid-cols-5'>
           <div className='col-span-2'>
             <ProductGallery images={product.images} />
           </div>
 
           <div className='flex w-full flex-col gap-2 md:p-5 col-span-2'>
             <div className='flex flex-col gap-3'>
-              <p className='p-medium-16 rounded-full bg-grey-500/10   text-grey-500'>
+              <p className='p-medium-16 rounded-full bg-grey-500/10 text-grey-500'>
                 {t('Product.Brand')} {product.brand} {product.category}
               </p>
+
               <h1 className='font-bold text-lg lg:text-xl'>{product.name}</h1>
 
               <RatingSummary
@@ -78,7 +83,9 @@ export default async function ProductDetails(props: {
                 asPopover
                 ratingDistribution={product.ratingDistribution}
               />
+
               <Separator />
+
               <div className='flex flex-col gap-3 sm:flex-row sm:items-center'>
                 <div className='flex gap-3'>
                   <ProductPrice
@@ -90,14 +97,17 @@ export default async function ProductDetails(props: {
                 </div>
               </div>
             </div>
+
             <div>
               <SelectVariant
                 product={product}
-                size={size || product.sizes[0]}
-                color={color || product.colors[0]}
+                size={size || product.sizes?.[0]}
+                color={color || product.colors?.[0]}
               />
             </div>
+
             <Separator className='my-2' />
+
             <div className='flex flex-col gap-2'>
               <p className='p-bold-20 text-grey-600'>
                 {t('Product.Description')}:
@@ -107,9 +117,10 @@ export default async function ProductDetails(props: {
               </p>
             </div>
           </div>
+
           <div>
             <Card>
-              <CardContent className='p-4 flex flex-col  gap-4'>
+              <CardContent className='p-4 flex flex-col gap-4'>
                 <ProductPrice price={product.price} />
 
                 {product.countInStock > 0 && product.countInStock <= 3 && (
@@ -119,6 +130,7 @@ export default async function ProductDetails(props: {
                     })}
                   </div>
                 )}
+
                 {product.countInStock !== 0 ? (
                   <div className='text-green-700 text-xl'>
                     {t('Product.In Stock')}
@@ -141,9 +153,9 @@ export default async function ProductDetails(props: {
                         category: product.category,
                         price: round2(product.price),
                         quantity: 1,
-                        image: product.images[0],
-                        size: size || product.sizes[0],
-                        color: color || product.colors[0],
+                        image: product.images?.[0] || '',
+                        size: size || product.sizes?.[0],
+                        color: color || product.colors?.[0],
                       }}
                     />
                   </div>
@@ -153,18 +165,21 @@ export default async function ProductDetails(props: {
           </div>
         </div>
       </section>
+
       <section className='mt-10'>
         <h2 className='h2-bold mb-2' id='reviews'>
           {t('Product.Customer Reviews')}
         </h2>
         <ReviewList product={product} userId={session?.user.id} />
       </section>
+
       <section className='mt-10'>
         <ProductSlider
           products={relatedProducts.data}
           title={t('Product.Best Sellers in', { name: product.category })}
         />
       </section>
+
       <section>
         <BrowsingHistoryList className='mt-10' />
       </section>

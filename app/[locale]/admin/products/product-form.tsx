@@ -26,48 +26,26 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { toSlug } from '@/lib/utils'
 import { IProductInput } from '@/types'
 
-const productDefaultValues: IProductInput =
-  process.env.NODE_ENV === 'development'
-    ? {
-        name: 'Sample Product',
-        slug: 'sample-product',
-        category: 'Sample Category',
-        images: ['/images/p11-1.jpg'],
-        brand: 'Sample Brand',
-        description: 'This is a sample description of the product.',
-        price: 99.99,
-        listPrice: 0,
-        countInStock: 15,
-        numReviews: 0,
-        avgRating: 0,
-        numSales: 0,
-        isPublished: false,
-        tags: [],
-        sizes: [],
-        colors: [],
-        ratingDistribution: [],
-        reviews: [],
-      }
-    : {
-        name: '',
-        slug: '',
-        category: '',
-        images: [],
-        brand: '',
-        description: '',
-        price: 0,
-        listPrice: 0,
-        countInStock: 0,
-        numReviews: 0,
-        avgRating: 0,
-        numSales: 0,
-        isPublished: false,
-        tags: [],
-        sizes: [],
-        colors: [],
-        ratingDistribution: [],
-        reviews: [],
-      }
+const productDefaultValues: IProductInput = {
+  name: '',
+  slug: '',
+  category: '',
+  images: [],
+  brand: '',
+  description: '',
+  price: 0,
+  listPrice: 0,
+  countInStock: 0,
+  numReviews: 0,
+  avgRating: 0,
+  numSales: 0,
+  isPublished: false,
+  tags: [],
+  sizes: [],
+  colors: [],
+  ratingDistribution: [],
+  reviews: [],
+}
 
 const ProductForm = ({
   type,
@@ -79,6 +57,7 @@ const ProductForm = ({
   productId?: string
 }) => {
   const router = useRouter()
+  const { toast } = useToast()
 
   const form = useForm<IProductInput>({
     resolver:
@@ -89,39 +68,50 @@ const ProductForm = ({
       product && type === 'Update' ? product : productDefaultValues,
   })
 
-  const { toast } = useToast()
+  const images = form.watch('images') || []
+
   async function onSubmit(values: IProductInput) {
     if (type === 'Create') {
       const res = await createProduct(values)
+
       if (!res.success) {
         toast({
           variant: 'destructive',
           description: res.message,
         })
-      } else {
-        toast({
-          description: res.message,
-        })
-        router.push(`/admin/products`)
-      }
-    }
-    if (type === 'Update') {
-      if (!productId) {
-        router.push(`/admin/products`)
         return
       }
+
+      toast({
+        description: res.message,
+      })
+
+      router.push('/admin/products')
+    }
+
+    if (type === 'Update') {
+      if (!productId) {
+        router.push('/admin/products')
+        return
+      }
+
       const res = await updateProduct({ ...values, _id: productId })
+
       if (!res.success) {
         toast({
           variant: 'destructive',
           description: res.message,
         })
-      } else {
-        router.push(`/admin/products`)
+        return
       }
+
+      toast({
+        description: res.message,
+      })
+
+      router.push('/admin/products')
     }
   }
-  const images = form.watch('images')
 
   return (
     <Form {...form}>
@@ -140,7 +130,6 @@ const ProductForm = ({
                 <FormControl>
                   <Input placeholder='Enter product name' {...field} />
                 </FormControl>
-
                 <FormMessage />
               </FormItem>
             )}
@@ -152,7 +141,6 @@ const ProductForm = ({
             render={({ field }) => (
               <FormItem className='w-full'>
                 <FormLabel>Slug</FormLabel>
-
                 <FormControl>
                   <div className='relative'>
                     <Input
@@ -171,12 +159,12 @@ const ProductForm = ({
                     </button>
                   </div>
                 </FormControl>
-
                 <FormMessage />
               </FormItem>
             )}
           />
         </div>
+
         <div className='flex flex-col gap-5 md:flex-row'>
           <FormField
             control={form.control}
@@ -201,12 +189,12 @@ const ProductForm = ({
                 <FormControl>
                   <Input placeholder='Enter product brand' {...field} />
                 </FormControl>
-
                 <FormMessage />
               </FormItem>
             )}
           />
         </div>
+
         <div className='flex flex-col gap-5 md:flex-row'>
           <FormField
             control={form.control}
@@ -221,6 +209,7 @@ const ProductForm = ({
               </FormItem>
             )}
           />
+
           <FormField
             control={form.control}
             name='price'
@@ -234,6 +223,7 @@ const ProductForm = ({
               </FormItem>
             )}
           />
+
           <FormField
             control={form.control}
             name='countInStock'
@@ -260,24 +250,51 @@ const ProductForm = ({
             render={() => (
               <FormItem className='w-full'>
                 <FormLabel>Images</FormLabel>
+
                 <Card>
-                  <CardContent className='space-y-2 mt-2 min-h-48'>
-                    <div className='flex justify-start items-center space-x-2'>
-                      {images.map((image: string) => (
-                        <Image
-                          key={image}
-                          src={image}
-                          alt='product image'
-                          className='w-20 h-20 object-cover object-center rounded-sm'
-                          width={100}
-                          height={100}
-                        />
+                  <CardContent className='space-y-4 mt-2 min-h-48'>
+                    {images.length === 0 && (
+                      <p className='text-sm text-gray-500'>
+                        No images uploaded
+                      </p>
+                    )}
+
+                    <div className='flex flex-wrap justify-start items-center gap-4'>
+                      {images.map((image: string, index: number) => (
+                        <div key={image} className='relative'>
+                          <Image
+                            src={image}
+                            alt='product image'
+                            className='w-20 h-20 object-cover object-center rounded-sm border'
+                            width={100}
+                            height={100}
+                          />
+
+                          <button
+                            type='button'
+                            onClick={() => {
+                              const updatedImages = images.filter(
+                                (_, i) => i !== index
+                              )
+                              form.setValue('images', updatedImages)
+                            }}
+                            className='absolute -top-2 -right-2 bg-red-600 text-white rounded-full w-6 h-6 text-xs flex items-center justify-center'
+                          >
+                            ×
+                          </button>
+                        </div>
                       ))}
+
                       <FormControl>
                         <UploadButton
                           endpoint='imageUploader'
                           onClientUploadComplete={(res: { url: string }[]) => {
-                            form.setValue('images', [...images, res[0].url])
+                            if (res && res.length > 0) {
+                              form.setValue('images', [
+                                ...images,
+                                res[0].url,
+                              ])
+                            }
                           }}
                           onUploadError={(error: Error) => {
                             toast({
@@ -306,20 +323,20 @@ const ProductForm = ({
                 <FormLabel>Description</FormLabel>
                 <FormControl>
                   <Textarea
-                    placeholder='Tell us a little bit about yourself'
+                    placeholder='Enter product description'
                     className='resize-none'
                     {...field}
                   />
                 </FormControl>
                 <FormDescription>
-                  You can <span>@mention</span> other users and organizations to
-                  link to them.
+                  Add product features, specifications, and important details.
                 </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
           />
         </div>
+
         <div>
           <FormField
             control={form.control}
@@ -337,6 +354,7 @@ const ProductForm = ({
             )}
           />
         </div>
+
         <div>
           <Button
             type='submit'
@@ -344,7 +362,9 @@ const ProductForm = ({
             disabled={form.formState.isSubmitting}
             className='button col-span-2 w-full'
           >
-            {form.formState.isSubmitting ? 'Submitting...' : `${type} Product `}
+            {form.formState.isSubmitting
+              ? 'Submitting...'
+              : `${type} Product`}
           </Button>
         </div>
       </form>
