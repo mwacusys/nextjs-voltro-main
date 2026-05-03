@@ -1,5 +1,5 @@
 import { IOrderInput } from '@/types'
-import { Document, Model, model, models, Schema } from 'mongoose'
+import { Model, model, models, Schema } from 'mongoose'
 
 export interface IOrder extends IOrderInput {
   _id: string
