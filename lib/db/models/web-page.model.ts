@@ -1,7 +1,7 @@
 import { IWebPageInput } from '@/types'
-import { Document, Model, model, models, Schema } from 'mongoose'
+import { Model, model, models, Schema } from 'mongoose'
 
-export interface IWebPage extends Document, IWebPageInput {
+export interface IWebPage extends IWebPageInput {
   _id: string
   createdAt: Date
   updatedAt: Date
