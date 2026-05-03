@@ -1,7 +1,7 @@
 import { ISettingInput } from '@/types'
-import { Document, Model, model, models, Schema } from 'mongoose'
+import { Model, model, models, Schema } from 'mongoose'
 
-export interface ISetting extends Document, ISettingInput {
+export interface ISetting extends ISettingInput {
   _id: string
   createdAt: Date
   updatedAt: Date

@@ -1,7 +1,7 @@
 import { IReviewInput } from '@/types'
-import { Document, Model, model, models, Schema } from 'mongoose'
+import { Model, model, models, Schema } from 'mongoose'
 
-export interface IReview extends Document, IReviewInput {
+export interface IReview extends IReviewInput {
   _id: string
   createdAt: Date
   updatedAt: Date
