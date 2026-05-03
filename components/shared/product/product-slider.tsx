@@ -22,7 +22,8 @@ export default function ProductSlider({
 }) {
   return (
     <div className='w-full bg-background'>
-      <h2 className='h2-bold mb-5'>{title}</h2>
+      {title && <h2 className='h2-bold mb-5'>{title}</h2>}
+
       <Carousel
         opts={{
           align: 'start',
@@ -30,9 +31,9 @@ export default function ProductSlider({
         className='w-full'
       >
         <CarouselContent>
-          {products.map((product) => (
+          {products.map((product, index) => (
             <CarouselItem
-              key={product.slug}
+              key={`${product._id || product.slug || 'product'}-${index}`}
               className={
                 hideDetails
                   ? 'md:basis-1/4 lg:basis-1/6'
@@ -48,6 +49,7 @@ export default function ProductSlider({
             </CarouselItem>
           ))}
         </CarouselContent>
+
         <CarouselPrevious className='left-0' />
         <CarouselNext className='right-0' />
       </Carousel>
