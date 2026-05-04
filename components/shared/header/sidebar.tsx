@@ -17,25 +17,25 @@ import { getLocale, getTranslations } from 'next-intl/server'
 import { getDirection } from '@/i18n-config'
 
 export default async function Sidebar({
-  categories,
+  departmentCategories,
 }: {
-  categories: string[]
+  departmentCategories: Record<string, string[]>
 }) {
   const session = await auth()
-
   const locale = await getLocale()
-
   const t = await getTranslations()
+
   return (
     <Drawer direction={getDirection(locale) === 'rtl' ? 'right' : 'left'}>
-      <DrawerTrigger className='header-button flex items-center !p-2  '>
+      <DrawerTrigger className='header-button flex items-center !p-2'>
         <MenuIcon className='h-5 w-5 mr-1' />
         {t('Header.All')}
       </DrawerTrigger>
+
       <DrawerContent className='w-[350px] mt-0 top-0'>
         <div className='flex flex-col h-full'>
-          {/* User Sign In Section */}
-          <div className='dark bg-gray-800 text-foreground flex items-center justify-between  '>
+          {/* User Section */}
+          <div className='dark bg-gray-800 text-foreground flex items-center justify-between'>
             <DrawerHeader>
               <DrawerTitle className='flex items-center'>
                 <UserCircle className='h-6 w-6 mr-2' />
@@ -57,55 +57,72 @@ export default async function Sidebar({
                   </DrawerClose>
                 )}
               </DrawerTitle>
-              <DrawerDescription></DrawerDescription>
+              <DrawerDescription />
             </DrawerHeader>
+
             <DrawerClose asChild>
               <Button variant='ghost' size='icon' className='mr-2'>
                 <X className='h-5 w-5' />
-                <span className='sr-only'>Close</span>
               </Button>
             </DrawerClose>
           </div>
 
-          {/* Shop By Category */}
+          {/* Department + Categories */}
           <div className='flex-1 overflow-y-auto'>
-            <div className='p-4 border-b'>
-              <h2 className='text-lg font-semibold'>
-                {t('Header.Shop By Battery')}
-              </h2>
-            </div>
             <nav className='flex flex-col'>
-              {categories.map((category) => (
-                <DrawerClose asChild key={category}>
-                  <Link
-                    href={`/search?category=${category}`}
-                    className={`flex items-center justify-between item-button`}
-                  >
-                    <span>{category}</span>
-                    <ChevronRight className='h-4 w-4' />
-                  </Link>
-                </DrawerClose>
-              ))}
+              {Object.entries(departmentCategories).map(
+                ([department, categories]) => (
+                  <div key={department} className='border-b'>
+                    {/* Department (NO capitalize → show as DB value) */}
+                    <div className='px-4 py-3 font-semibold'>
+                      {department}
+                    </div>
+
+                    {/* Categories */}
+                    <div className='pb-2'>
+                      {categories.map((category) => (
+                        <DrawerClose
+                          asChild
+                          key={`${department}-${category}`}
+                        >
+                          <Link
+                            href={`/search?department=${encodeURIComponent(
+                              department
+                            )}&category=${encodeURIComponent(category)}`}
+                            className='flex items-center justify-between item-button pl-8 text-sm'
+                          >
+                            <span>{category}</span>
+                            <ChevronRight className='h-3 w-3' />
+                          </Link>
+                        </DrawerClose>
+                      ))}
+                    </div>
+                  </div>
+                )
+              )}
             </nav>
           </div>
 
-          {/* Setting and Help */}
-          <div className='border-t flex flex-col '>
+          {/* Footer */}
+          <div className='border-t flex flex-col'>
             <div className='p-4'>
               <h2 className='text-lg font-semibold'>
                 {t('Header.Help & Settings')}
               </h2>
             </div>
+
             <DrawerClose asChild>
               <Link href='/account' className='item-button'>
                 {t('Header.Your account')}
               </Link>
-            </DrawerClose>{' '}
+            </DrawerClose>
+
             <DrawerClose asChild>
               <Link href='/page/customer-service' className='item-button'>
                 {t('Header.Customer Service')}
               </Link>
             </DrawerClose>
+
             {session ? (
               <form action={SignOut} className='w-full'>
                 <Button
@@ -116,9 +133,11 @@ export default async function Sidebar({
                 </Button>
               </form>
             ) : (
-              <Link href='/sign-in' className='item-button'>
-                {t('Header.Sign in')}
-              </Link>
+              <DrawerClose asChild>
+                <Link href='/sign-in' className='item-button'>
+                  {t('Header.Sign in')}
+                </Link>
+              </DrawerClose>
             )}
           </div>
         </div>

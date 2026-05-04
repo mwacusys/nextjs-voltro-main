@@ -40,6 +40,7 @@ export async function updateProduct(data: z.infer<typeof ProductUpdateSchema>) {
     return { success: false, message: formatError(error) }
   }
 }
+
 // DELETE
 export async function deleteProduct(id: string) {
   try {
@@ -55,6 +56,7 @@ export async function deleteProduct(id: string) {
     return { success: false, message: formatError(error) }
   }
 }
+
 // GET ONE PRODUCT BY ID
 export async function getProductById(productId: string) {
   await connectToDatabase()
@@ -79,7 +81,9 @@ export async function getAllProductsForAdmin({
   const {
     common: { pageSize },
   } = await getSetting()
+
   limit = limit || pageSize
+
   const queryFilter =
     query && query !== 'all'
       ? {
@@ -100,6 +104,7 @@ export async function getAllProductsForAdmin({
           : sort === 'avg-customer-review'
             ? { avgRating: -1 }
             : { _id: -1 }
+
   const products = await Product.find({
     ...queryFilter,
   })
@@ -111,22 +116,72 @@ export async function getAllProductsForAdmin({
   const countProducts = await Product.countDocuments({
     ...queryFilter,
   })
+
   return {
     products: JSON.parse(JSON.stringify(products)) as IProduct[],
-    totalPages: Math.ceil(countProducts / pageSize),
+    totalPages: Math.ceil(countProducts / limit),
     totalProducts: countProducts,
-    from: pageSize * (Number(page) - 1) + 1,
-    to: pageSize * (Number(page) - 1) + products.length,
+    from: limit * (Number(page) - 1) + 1,
+    to: limit * (Number(page) - 1) + products.length,
   }
 }
 
+// GET ALL CATEGORIES
 export async function getAllCategories() {
   await connectToDatabase()
+
   const categories = await Product.find({ isPublished: true }).distinct(
     'category'
   )
+
   return categories
 }
+
+// GET ALL DEPARTMENTS
+export async function getAllDepartments() {
+  await connectToDatabase()
+
+  const departments = await Product.find({ isPublished: true }).distinct(
+    'department'
+  )
+
+  return departments
+}
+
+// GET DEPARTMENT WITH CATEGORIES
+export async function getDepartmentCategories() {
+  await connectToDatabase()
+
+  const products = await Product.find(
+    { isPublished: true },
+    { department: 1, category: 1 }
+  ).lean()
+
+  const result: Record<string, string[]> = {}
+
+  products.forEach((product) => {
+    const department = product.department
+    const category = product.category
+
+    if (!department || !category) return
+
+    if (!result[department]) {
+      result[department] = []
+    }
+
+    if (!result[department].includes(category)) {
+      result[department].push(category)
+    }
+  })
+
+  Object.keys(result).forEach((department) => {
+    result[department].sort((a, b) => a.localeCompare(b))
+  })
+
+  return result
+}
+
+// GET PRODUCTS FOR CARD
 export async function getProductsForCard({
   tag,
   limit = 4,
@@ -135,6 +190,7 @@ export async function getProductsForCard({
   limit?: number
 }) {
   await connectToDatabase()
+
   const products = await Product.find(
     { tags: { $in: [tag] }, isPublished: true },
     {
@@ -145,12 +201,14 @@ export async function getProductsForCard({
   )
     .sort({ createdAt: 'desc' })
     .limit(limit)
+
   return JSON.parse(JSON.stringify(products)) as {
     name: string
     href: string
     image: string
   }[]
 }
+
 // GET PRODUCTS BY TAG
 export async function getProductsByTag({
   tag,
@@ -160,22 +218,28 @@ export async function getProductsByTag({
   limit?: number
 }) {
   await connectToDatabase()
+
   const products = await Product.find({
     tags: { $in: [tag] },
     isPublished: true,
   })
     .sort({ createdAt: 'desc' })
     .limit(limit)
+
   return JSON.parse(JSON.stringify(products)) as IProduct[]
 }
 
 // GET ONE PRODUCT BY SLUG
 export async function getProductBySlug(slug: string) {
   await connectToDatabase()
+
   const product = await Product.findOne({ slug, isPublished: true })
+
   if (!product) throw new Error('Product not found')
+
   return JSON.parse(JSON.stringify(product)) as IProduct
 }
+
 // GET RELATED PRODUCTS: PRODUCTS WITH SAME CATEGORY
 export async function getRelatedProductsByCategory({
   category,
@@ -191,19 +255,26 @@ export async function getRelatedProductsByCategory({
   const {
     common: { pageSize },
   } = await getSetting()
+
   limit = limit || pageSize
+
   await connectToDatabase()
+
   const skipAmount = (Number(page) - 1) * limit
+
   const conditions = {
     isPublished: true,
     category,
     _id: { $ne: productId },
   }
+
   const products = await Product.find(conditions)
     .sort({ numSales: 'desc' })
     .skip(skipAmount)
     .limit(limit)
+
   const productsCount = await Product.countDocuments(conditions)
+
   return {
     data: JSON.parse(JSON.stringify(products)) as IProduct[],
     totalPages: Math.ceil(productsCount / limit),
@@ -215,6 +286,7 @@ export async function getAllProducts({
   query,
   limit,
   page,
+  department,
   category,
   tag,
   price,
@@ -222,6 +294,7 @@ export async function getAllProducts({
   sort,
 }: {
   query: string
+  department?: string
   category: string
   tag: string
   limit?: number
@@ -233,7 +306,9 @@ export async function getAllProducts({
   const {
     common: { pageSize },
   } = await getSetting()
+
   limit = limit || pageSize
+
   await connectToDatabase()
 
   const queryFilter =
@@ -245,7 +320,12 @@ export async function getAllProducts({
           },
         }
       : {}
+
+  const departmentFilter =
+    department && department !== 'all' ? { department } : {}
+
   const categoryFilter = category && category !== 'all' ? { category } : {}
+
   const tagFilter = tag && tag !== 'all' ? { tags: tag } : {}
 
   const ratingFilter =
@@ -256,7 +336,7 @@ export async function getAllProducts({
           },
         }
       : {}
-  // 10-50
+
   const priceFilter =
     price && price !== 'all'
       ? {
@@ -266,6 +346,7 @@ export async function getAllProducts({
           },
         }
       : {}
+
   const order: Record<string, 1 | -1> =
     sort === 'best-selling'
       ? { numSales: -1 }
@@ -276,10 +357,13 @@ export async function getAllProducts({
           : sort === 'avg-customer-review'
             ? { avgRating: -1 }
             : { _id: -1 }
+
   const isPublished = { isPublished: true }
+
   const products = await Product.find({
     ...isPublished,
     ...queryFilter,
+    ...departmentFilter,
     ...tagFilter,
     ...categoryFilter,
     ...priceFilter,
@@ -291,12 +375,15 @@ export async function getAllProducts({
     .lean()
 
   const countProducts = await Product.countDocuments({
+    ...isPublished,
     ...queryFilter,
+    ...departmentFilter,
     ...tagFilter,
     ...categoryFilter,
     ...priceFilter,
     ...ratingFilter,
   })
+
   return {
     products: JSON.parse(JSON.stringify(products)) as IProduct[],
     totalPages: Math.ceil(countProducts / limit),
@@ -306,15 +393,20 @@ export async function getAllProducts({
   }
 }
 
+// GET ALL TAGS
 export async function getAllTags() {
+  await connectToDatabase()
+
   const tags = await Product.aggregate([
+    { $match: { isPublished: true } },
     { $unwind: '$tags' },
     { $group: { _id: null, uniqueTags: { $addToSet: '$tags' } } },
     { $project: { _id: 0, uniqueTags: 1 } },
   ])
+
   return (
     (tags[0]?.uniqueTags
-      .sort((a: string, b: string) => a.localeCompare(b))
+      ?.sort((a: string, b: string) => a.localeCompare(b))
       .map((x: string) =>
         x
           .split('-')

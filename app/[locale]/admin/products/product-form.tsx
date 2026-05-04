@@ -30,6 +30,7 @@ import { IProductInput } from '@/types'
 const productDefaultValues: IProductInput = {
   name: '',
   slug: '',
+  department: '',
   category: '',
   images: [],
   brand: '',
@@ -47,6 +48,15 @@ const productDefaultValues: IProductInput = {
   ratingDistribution: [],
   reviews: [],
 }
+
+const departmentOptions = [
+  { label: 'Battery', value: 'Battery' },
+  { label: 'BMS', value: 'BMS' },
+  { label: 'Embedded Board', value: 'Embedded Board' },
+  { label: 'FPGA', value: 'FPGA' },
+  { label: 'Robot / Automation', value: 'Robot-Automation' },
+  { label: 'Other', value: 'Other' },
+]
 
 const tagOptions = [
   { label: 'New Arrival', value: 'new-arrival' },
@@ -169,6 +179,30 @@ const ProductForm = ({
         </div>
 
         <div className='flex flex-col gap-5 md:flex-row'>
+          <FormField
+            control={form.control}
+            name='department'
+            render={({ field }) => (
+              <FormItem className='w-full'>
+                <FormLabel>Department</FormLabel>
+                <FormControl>
+                  <select
+                    {...field}
+                    className='flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm'
+                  >
+                    <option value=''>Select department</option>
+                    {departmentOptions.map((department) => (
+                      <option key={department.value} value={department.value}>
+                        {department.label}
+                      </option>
+                    ))}
+                  </select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
           <FormField
             control={form.control}
             name='category'

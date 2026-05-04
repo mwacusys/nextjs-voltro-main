@@ -18,6 +18,10 @@ const productSchema = new Schema<IProduct>(
       required: true,
       unique: true,
     },
+    department: {
+      type: String,
+      required: true,
+    },
     category: {
       type: String,
       required: true,
