@@ -202,7 +202,7 @@ const data: Data = {
         address: 'Korea',
         phone: '+82',
       },
-      carousels: carousels.map(({ isPublished: _isPublished, ...carousel }) => carousel),
+      carousels: carousels.map(({ isPublished: _, ...carousel }) => carousel),
       availableLanguages: i18n.locales.map((l) => ({
         code: l.code,
         name: l.name,
