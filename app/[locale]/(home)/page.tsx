@@ -3,6 +3,7 @@ import BrowsingHistoryList from '@/components/shared/browsing-history-list'
 import { HomeCard } from '@/components/shared/home/home-card'
 import ProductSlider from '@/components/shared/product/product-slider'
 import { Card, CardContent } from '@/components/ui/card'
+import Image from 'next/image'
 
 import {
   getProductsForCard,
@@ -193,9 +194,12 @@ export default async function HomePage() {
               <div className='absolute -inset-px rounded-[2rem] bg-gradient-to-br from-green-400/30 via-cyan-400/10 to-transparent opacity-70' />
 
               <div className='relative overflow-hidden rounded-[1.5rem] border border-white/10 bg-[#041625]'>
-                <img
+                <Image
                   src='/images/banner/voltro-home-banner.png'
                   alt='VOLTRO Energy Products'
+                  width={900}
+                  height={600}
+                  priority
                   className='h-[420px] w-full object-cover'
                 />
 
